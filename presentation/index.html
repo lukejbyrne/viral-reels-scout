@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Viral Reels Scout - Presentation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0c0c0b;
+    --cream: #fef8ea;
+    --coral: #e85d4a;
+    --orange: #f4a261;
+    --card-bg: #161615;
+    --card-border: rgba(254, 248, 234, 0.06);
+    --muted: rgba(254, 248, 234, 0.45);
+    --font-display: 'Instrument Serif', Georgia, serif;
+    --font-body: 'Manrope', system-ui, sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+
+  html, body { height: 100%; background: var(--bg); color: var(--cream); font-family: var(--font-body); overflow: hidden; -webkit-font-smoothing: antialiased; }
+
+  .deck { position: relative; width: 100vw; height: 100vh; }
+  .deck::after {
+    content: ''; position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 50; opacity: 0.5;
+  }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 60px 80px;
+    opacity: 0; transform: translateY(12px); pointer-events: none;
+    transition: opacity 0.5s cubic-bezier(0.4,0,0.2,1), transform 0.5s cubic-bezier(0.4,0,0.2,1);
+  }
+  .slide.active { opacity: 1; transform: translateY(0); pointer-events: auto; }
+
+  /* UI CHROME */
+  .counter { position: fixed; top: 28px; right: 36px; font-family: var(--font-mono); font-size: 13px; color: var(--muted); letter-spacing: 0.5px; z-index: 100; }
+  .dots { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 200; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(254,248,234,0.15); transition: background 0.3s, transform 0.3s; cursor: pointer; }
+  .dot.active { background: var(--coral); transform: scale(1.3); }
+  .keyboard-hint { position: fixed; bottom: 28px; right: 36px; font-family: var(--font-mono); font-size: 11px; color: rgba(254,248,234,0.2); z-index: 100; }
+
+  /* STEP REVEALS */
+  .step { opacity: 0; transform: translateY(8px); transition: opacity 0.35s ease, transform 0.35s ease; pointer-events: none; }
+  .step.revealed { opacity: 1; transform: translateY(0); pointer-events: auto; }
+
+  /* TYPOGRAPHY */
+  h1 { font-family: var(--font-display); font-weight: 400; font-size: clamp(36px, 4.5vw, 64px); line-height: 1.15; text-align: center; letter-spacing: -0.5px; }
+  h1 strong { color: var(--coral); font-weight: 400; }
+
+  .subtitle { font-size: clamp(14px, 1.4vw, 18px); color: var(--muted); margin-top: 16px; text-align: center; font-weight: 400; letter-spacing: 0.2px; }
+
+  .bottom-text { margin-top: 40px; font-size: clamp(13px, 1.2vw, 16px); color: var(--muted); text-align: center; font-weight: 400; }
+  .bottom-text em { font-family: var(--font-display); font-style: italic; font-size: clamp(14px, 1.3vw, 18px); color: var(--muted); }
+
+  .ul-coral { text-decoration: underline; text-decoration-color: var(--coral); text-underline-offset: 6px; text-decoration-thickness: 2px; }
+  .ul-orange { text-decoration: underline; text-decoration-color: var(--orange); text-underline-offset: 6px; text-decoration-thickness: 2px; }
+
+  /* TRANSITION LABEL */
+  .transition-label { font-family: var(--font-mono); font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: var(--orange); margin-bottom: 20px; }
+
+  /* FEATURE CARDS */
+  .cards-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; margin-top: 48px; max-width: 900px; width: 100%; }
+
+  .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px; padding: 28px 24px; text-align: center; }
+  .card .emoji { font-size: 28px; margin-bottom: 14px; display: block; }
+  .card .card-label { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--coral); margin-bottom: 8px; }
+  .card .card-title { font-family: var(--font-body); font-weight: 600; font-size: 15px; margin-bottom: 8px; color: var(--cream); }
+  .card .card-desc { font-size: 13px; color: var(--muted); line-height: 1.55; font-weight: 400; }
+
+  /* PIPELINE */
+  .pipeline { display: flex; align-items: center; gap: 0; margin-top: 48px; }
+  .pipe-step { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 22px 28px; text-align: center; min-width: 160px; }
+  .pipe-step .pipe-icon { font-size: 24px; display: block; margin-bottom: 10px; }
+  .pipe-step .pipe-name { font-weight: 600; font-size: 14px; color: var(--cream); margin-bottom: 4px; }
+  .pipe-step .pipe-detail { font-size: 12px; color: var(--muted); line-height: 1.4; }
+  .pipe-arrow { font-size: 20px; color: var(--coral); padding: 0 12px; flex-shrink: 0; }
+
+  /* CHECKLIST */
+  .checklist { display: flex; flex-direction: column; gap: 2px; margin-top: 36px; max-width: 680px; width: 100%; }
+  .check-item { display: flex; align-items: baseline; gap: 12px; font-size: 15px; color: var(--cream); padding: 8px 0; border-bottom: 1px solid var(--card-border); line-height: 1.5; }
+  .check-item:last-child { border-bottom: none; }
+  .check-icon { color: var(--coral); font-weight: 700; flex-shrink: 0; min-width: 16px; }
+
+  /* STAT ROW */
+  .stat-row { display: flex; gap: 64px; margin-top: 48px; justify-content: center; align-items: flex-end; }
+  .stat { text-align: center; }
+  .stat .stat-number { font-family: var(--font-display); font-size: clamp(36px, 4vw, 56px); color: var(--coral); line-height: 1; }
+  .stat .stat-label { font-family: var(--font-mono); font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; margin-top: 8px; }
+
+  /* TELEPROMPTER */
+  .teleprompter { max-width: 700px; width: 100%; text-align: left; }
+  .teleprompter h2 { font-family: var(--font-mono); font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: var(--coral); margin-bottom: 24px; }
+  .teleprompter p { font-size: clamp(18px, 2vw, 24px); color: var(--cream); line-height: 1.7; margin-bottom: 16px; font-weight: 400; }
+  .teleprompter .cue { color: var(--orange); font-family: var(--font-mono); font-size: 13px; margin-bottom: 16px; }
+
+  /* DRAWING TOOLS */
+  .draw-toolbar { position: fixed; top: 24px; left: 28px; display: flex; gap: 6px; z-index: 200; }
+  .draw-btn { width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--card-border); background: var(--card-bg); color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; position: relative; }
+  .draw-btn:hover { border-color: rgba(254,248,234,0.15); color: var(--cream); }
+  .draw-btn.active { border-color: var(--coral); color: var(--coral); background: rgba(232,93,74,0.1); }
+  .draw-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .draw-btn .shortcut { position: absolute; bottom: -16px; left: 50%; transform: translateX(-50%); font-family: var(--font-mono); font-size: 9px; color: rgba(254,248,234,0.2); pointer-events: none; }
+  .draw-btn.clear-btn { margin-left: 6px; }
+  #draw-canvas { position: fixed; inset: 0; z-index: 150; pointer-events: none; }
+  #draw-canvas.drawing { pointer-events: auto; cursor: crosshair; }
+  #draw-canvas.erasing { pointer-events: auto; cursor: pointer; }
+  #draw-canvas.erasing .drawn:hover { stroke: rgba(254,248,234,0.3); filter: drop-shadow(0 0 6px rgba(232,93,74,0.4)); }
+</style>
+</head>
+<body>
+
+<div class="counter" id="counter">1 / 6</div>
+<div class="dots" id="dots"></div>
+<div class="keyboard-hint">< ></div>
+
+<div class="draw-toolbar">
+  <button class="draw-btn" id="btn-pen" title="Pen"><svg viewBox="0 0 24 24"><path d="M3 21l1.5-4.5L17.7 3.3a1 1 0 0 1 1.4 0l1.6 1.6a1 1 0 0 1 0 1.4L7.5 19.5z"/><path d="M15 5l4 4"/></svg><span class="shortcut">Q</span></button>
+  <button class="draw-btn" id="btn-box" title="Rectangle"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg><span class="shortcut">W</span></button>
+  <button class="draw-btn" id="btn-arrow" title="Arrow"><svg viewBox="0 0 24 24"><line x1="5" y1="19" x2="19" y2="5"/><polyline points="12 5 19 5 19 12"/></svg><span class="shortcut">E</span></button>
+  <button class="draw-btn" id="btn-eraser" title="Eraser"><svg viewBox="0 0 24 24"><path d="M20 20H7L3 16a1 1 0 0 1 0-1.4l9.6-9.6a2 2 0 0 1 2.8 0l5.2 5.2a2 2 0 0 1 0 2.8L15 18.6"/><line x1="6" y1="20" x2="20" y2="20"/></svg><span class="shortcut">R</span></button>
+  <button class="draw-btn clear-btn" id="btn-clear" title="Clear (Esc)"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg><span class="shortcut">Esc</span></button>
+</div>
+
+<svg id="draw-canvas" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+  <defs><marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#e85d4a"/></marker></defs>
+</svg>
+
+<div class="deck" id="deck">
+
+
+  <!-- SLIDE 0: TELEPROMPTER (not shown on camera) -->
+  <div class="slide active" data-slide="0">
+    <div class="teleprompter">
+      <h2>Teleprompter -- not recorded</h2>
+      <p class="cue">[FACE CAM]</p>
+      <p>Remember the TikTok Scout I built? Same idea -- but this time it's Instagram Reels. Type any niche, pull what's going viral right now, star your favorites, sort by engagement. One HTML file, no frameworks. Let me show you how it works.</p>
+      <p class="cue">[CUT TO SLIDE 1]</p>
+    </div>
+  </div>
+
+
+  <!-- SLIDE 1: TITLE -->
+  <div class="slide" data-slide="1">
+    <h1>Find Viral <strong>Instagram Reels</strong><br>in Any Niche</h1>
+    <p class="subtitle">One HTML file. Zero dependencies. Live data from the Apify API.</p>
+  </div>
+
+
+  <!-- SLIDE 2: CONTEXT -- SAME POWER, NOW FOR REELS -->
+  <div class="slide" data-slide="2">
+    <p class="transition-label">Same Pattern, New Platform</p>
+    <h1>Same power as <strong>TikTok Scout</strong><br>now for <strong>Reels</strong></h1>
+    <div class="cards-3">
+      <div class="card step">
+        <span class="emoji">1</span>
+        <div class="card-label">Architecture</div>
+        <div class="card-title">One HTML File</div>
+        <div class="card-desc">No frameworks, no build step. Open the file and it works.</div>
+      </div>
+      <div class="card step">
+        <span class="emoji">2</span>
+        <div class="card-label">Data</div>
+        <div class="card-title">Apify API</div>
+        <div class="card-desc">Same free-tier API. Swap the actor and you're pulling Reels.</div>
+      </div>
+      <div class="card step">
+        <span class="emoji">3</span>
+        <div class="card-label">Workflow</div>
+        <div class="card-title">Clone, Customize, Deploy</div>
+        <div class="card-desc">Identical flow. If you built TikTok Scout, you already know this.</div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- SLIDE 3: PIPELINE -- SEARCH, PREVIEW, STAR, ANALYSE -->
+  <div class="slide" data-slide="3">
+    <h1>How it <strong>works</strong></h1>
+    <div class="pipeline">
+      <div class="pipe-step">
+        <span class="pipe-icon">1</span>
+        <div class="pipe-name">Search</div>
+        <div class="pipe-detail">Type any niche<br>hit Search Reels</div>
+      </div>
+      <span class="pipe-arrow">&rarr;</span>
+      <div class="pipe-step">
+        <span class="pipe-icon">2</span>
+        <div class="pipe-name">Preview</div>
+        <div class="pipe-detail">Thumbnails, stats,<br>captions inline</div>
+      </div>
+      <span class="pipe-arrow">&rarr;</span>
+      <div class="pipe-step">
+        <span class="pipe-icon">3</span>
+        <div class="pipe-name">Star</div>
+        <div class="pipe-detail">Save favorites<br>persists locally</div>
+      </div>
+      <span class="pipe-arrow">&rarr;</span>
+      <div class="pipe-step">
+        <span class="pipe-icon">4</span>
+        <div class="pipe-name">Analyse</div>
+        <div class="pipe-detail">Sort, filter,<br>compare trends</div>
+      </div>
+    </div>
+    <p class="bottom-text"><em>One niche in. Trending Reels out.</em></p>
+  </div>
+
+
+  <!-- SLIDE 4: THE TRIFECTA -->
+  <div class="slide" data-slide="4">
+    <h1>The <strong>Trifecta</strong></h1>
+    <p class="subtitle">Three platforms. Same pattern. Full coverage.</p>
+    <div class="stat-row">
+      <div class="stat step">
+        <div class="stat-number">TikTok</div>
+        <div class="stat-label">Scout #1</div>
+      </div>
+      <div class="stat step">
+        <div class="stat-number">Reels</div>
+        <div class="stat-label">Scout #2</div>
+      </div>
+      <div class="stat step">
+        <div class="stat-number">Shorts</div>
+        <div class="stat-label">Scout #3</div>
+      </div>
+    </div>
+    <p class="bottom-text step"><em>Compare what's trending across all three -- same niche, different platforms.</em></p>
+  </div>
+
+
+  <!-- SLIDE 5: CTA -->
+  <div class="slide" data-slide="5">
+    <h1>Build with <strong>Luke</strong></h1>
+    <p class="subtitle" style="font-size: clamp(18px, 2vw, 26px); color: var(--orange); margin-top: 20px; font-family: var(--font-mono);">skool.com/build-with-luke</p>
+    <div class="checklist" style="margin-top: 32px; max-width: 480px;">
+      <div class="check-item"><span class="check-icon">&#10003;</span> Clone it, customize it, deploy it</div>
+      <div class="check-item"><span class="check-icon">&#10003;</span> Extend with Claude Code</div>
+      <div class="check-item"><span class="check-icon">&#10003;</span> Link in the description</div>
+    </div>
+  </div>
+
+
+</div><!-- /deck -->
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+
+  const dotsContainer = document.getElementById('dots');
+  for (let i = 0; i < total; i++) {
+    const dot = document.createElement('span');
+    dot.className = 'dot' + (i === 0 ? ' active' : '');
+    dot.addEventListener('click', () => goTo(i));
+    dotsContainer.appendChild(dot);
+  }
+
+  const STEP_SEL = '.stat-box, .stat, .card, .card-item, .check-item, .layer-item, .timeline-item, .bottom-text, .quote-block, .pipe-step';
+  document.querySelectorAll(STEP_SEL).forEach(el => {
+    if (!el.classList.contains('step')) el.classList.add('step');
+  });
+
+  function getSteps(slideEl) { return Array.from(slideEl.querySelectorAll('.step')); }
+
+  function goTo(n) {
+    if (n < 0 || n >= total) return;
+    slides[current].classList.remove('active');
+    dotsContainer.children[current].classList.remove('active');
+    getSteps(slides[current]).forEach(s => s.classList.remove('revealed'));
+    current = n;
+    slides[current].classList.add('active');
+    dotsContainer.children[current].classList.add('active');
+    document.getElementById('counter').textContent = `${current + 1} / ${total}`;
+    clearCanvas();
+  }
+
+  function advance() {
+    const hidden = getSteps(slides[current]).filter(s => !s.classList.contains('revealed'));
+    if (hidden.length) { hidden[0].classList.add('revealed'); } else { goTo(current + 1); }
+  }
+
+  function retreat() {
+    const revealed = getSteps(slides[current]).filter(s => s.classList.contains('revealed'));
+    if (revealed.length) { revealed[revealed.length - 1].classList.remove('revealed'); } else { goTo(current - 1); }
+  }
+
+  // DRAWING
+  const canvas = document.getElementById('draw-canvas');
+  const btnPen = document.getElementById('btn-pen');
+  const btnBox = document.getElementById('btn-box');
+  const btnArrow = document.getElementById('btn-arrow');
+  const btnEraser = document.getElementById('btn-eraser');
+  const btnClear = document.getElementById('btn-clear');
+
+  let drawMode = null, isDrawing = false, startX, startY, currentPath = null, pathData = '';
+
+  function setMode(mode) {
+    canvas.classList.remove('drawing', 'erasing');
+    [btnPen, btnBox, btnArrow, btnEraser].forEach(b => b.classList.remove('active'));
+    if (drawMode === mode) { drawMode = null; return; }
+    drawMode = mode;
+    if (mode === 'eraser') canvas.classList.add('erasing'); else canvas.classList.add('drawing');
+    if (mode === 'pen') btnPen.classList.add('active');
+    if (mode === 'box') btnBox.classList.add('active');
+    if (mode === 'arrow') btnArrow.classList.add('active');
+    if (mode === 'eraser') btnEraser.classList.add('active');
+  }
+
+  function clearCanvas() { canvas.querySelectorAll('.drawn').forEach(el => el.remove()); }
+
+  btnPen.addEventListener('click', () => setMode('pen'));
+  btnBox.addEventListener('click', () => setMode('box'));
+  btnArrow.addEventListener('click', () => setMode('arrow'));
+  btnEraser.addEventListener('click', () => setMode('eraser'));
+  btnClear.addEventListener('click', clearCanvas);
+
+  canvas.addEventListener('mousedown', (e) => {
+    if (!drawMode) return;
+    if (drawMode === 'eraser') { isDrawing = true; if (e.target.classList.contains('drawn')) e.target.remove(); return; }
+    isDrawing = true; startX = e.clientX; startY = e.clientY;
+    if (drawMode === 'pen') {
+      currentPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      currentPath.setAttribute('stroke', '#e85d4a'); currentPath.setAttribute('stroke-width', '2.5');
+      currentPath.setAttribute('fill', 'none'); currentPath.setAttribute('stroke-linecap', 'round'); currentPath.setAttribute('stroke-linejoin', 'round');
+      currentPath.classList.add('drawn'); pathData = `M ${startX} ${startY}`; currentPath.setAttribute('d', pathData); canvas.appendChild(currentPath);
+    } else if (drawMode === 'box') {
+      currentPath = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      currentPath.setAttribute('stroke', '#e85d4a'); currentPath.setAttribute('stroke-width', '2.5'); currentPath.setAttribute('fill', 'none'); currentPath.setAttribute('rx', '6');
+      currentPath.classList.add('drawn'); canvas.appendChild(currentPath);
+    } else if (drawMode === 'arrow') {
+      currentPath = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      currentPath.setAttribute('stroke', '#e85d4a'); currentPath.setAttribute('stroke-width', '2.5'); currentPath.setAttribute('marker-end', 'url(#arrowhead)');
+      currentPath.setAttribute('x1', startX); currentPath.setAttribute('y1', startY); currentPath.setAttribute('x2', startX); currentPath.setAttribute('y2', startY);
+      currentPath.classList.add('drawn'); canvas.appendChild(currentPath);
+    }
+  });
+
+  canvas.addEventListener('mousemove', (e) => {
+    if (!isDrawing) return;
+    const x = e.clientX, y = e.clientY;
+    if (drawMode === 'eraser') { const el = document.elementFromPoint(x, y); if (el && el.classList.contains('drawn')) el.remove(); return; }
+    if (!currentPath) return;
+    if (drawMode === 'pen') { pathData += ` L ${x} ${y}`; currentPath.setAttribute('d', pathData); }
+    else if (drawMode === 'box') { currentPath.setAttribute('x', Math.min(startX,x)); currentPath.setAttribute('y', Math.min(startY,y)); currentPath.setAttribute('width', Math.abs(x-startX)); currentPath.setAttribute('height', Math.abs(y-startY)); }
+    else if (drawMode === 'arrow') { currentPath.setAttribute('x2', x); currentPath.setAttribute('y2', y); }
+  });
+
+  canvas.addEventListener('mouseup', () => { isDrawing = false; currentPath = null; });
+  canvas.addEventListener('mouseleave', () => { isDrawing = false; currentPath = null; });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'q' || e.key === 'Q') { setMode('pen'); return; }
+    if (e.key === 'w' || e.key === 'W') { setMode('box'); return; }
+    if (e.key === 'e' || e.key === 'E') { setMode('arrow'); return; }
+    if (e.key === 'r' || e.key === 'R') { setMode('eraser'); return; }
+    if (e.key === 'Escape') { clearCanvas(); setMode(null); return; }
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); advance(); }
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); retreat(); }
+  });
+
+  let touchStartX = 0;
+  document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
+  document.addEventListener('touchend', (e) => { if (drawMode) return; const diff = touchStartX - e.changedTouches[0].clientX; if (Math.abs(diff) > 50) { diff > 0 ? advance() : retreat(); } });
+</script>
+
+</body>
+</html>

@@ -1,78 +1,59 @@
-# Viral Reels Scout
+# Viral Instagram Reels Scout
 
-A dashboard that finds trending Instagram Reels and lets you browse, filter, and save them for content research.
+A dashboard that finds trending Instagram Reels in any niche. Search, preview thumbnails, star your favorites, sort by engagement — all from a single HTML file.
 
-**How it works:** Pulls trending Instagram Reels across categories (fitness, cooking, tech, etc.) using [Apify](https://apify.com) scrapers, displays them in a browsable dashboard with thumbnails and stats, and lets you star/save your favorites.
+![HTML](https://img.shields.io/badge/HTML-Single_File-E34F26?logo=html5&logoColor=white) ![Apify](https://img.shields.io/badge/Apify-Powered-00C896) ![Zero Deps](https://img.shields.io/badge/Dependencies-Zero-333)
 
 ## Features
 
-- **Search any niche** -- type "fitness", "cooking", "real estate" or click a preset niche button
-- **Customizable niche buttons** -- configure your own in Settings
-- **Star/save reels** -- persists to disk via `server.js` or localStorage as fallback
-- **Filter and sort** by category, likes, views, comments, or recency
-- **Thumbnail previews** -- click through to view on Instagram
-- **Copy URL** -- one-click copy for sharing or saving
-- **No Instagram account needed** -- browse trends without the app
+- **Search any niche** — pull live Instagram Reels data via Apify
+- **Thumbnail previews** — see the Reel thumbnail, click through to Instagram
+- **Star/save favorites** — persisted to localStorage or disk via optional server
+- **Sort by engagement** — views, likes, comments, or most recent
+- **Category filters** — auto-generated from search results
+- **Customizable niche buttons** — set your go-to niches in Settings
+- **Copy URL** — one-click copy any Reel link
+- **Instagram-branded UI** — dark theme with the Instagram gradient
+- **Sample data included** — 20 Reels across 10 categories load instantly
+
+Part of the **Scout Trifecta**: [TikTok](https://github.com/lukejbyrne/viral-tiktok-scout) · [Instagram Reels](https://github.com/lukejbyrne/viral-reels-scout) · [YouTube Shorts](https://github.com/lukejbyrne/viral-shorts-scout)
 
 ## Quick Start
 
-### Option A: Just open it (simplest)
-1. Clone the repo
-2. Open `dashboard.html` in your browser
-3. Browse sample trending reels
-
-### Option B: With persistent starred reels (recommended)
-1. Clone the repo
-2. Run `node server.js`
-3. Open `http://localhost:3001`
-
-Option B saves your starred reels to `stars.json` on disk, so they survive browser data clears. Zero dependencies -- just Node.
-
-Both options work with the full feature set: search, star, filter, sort, and copy URL.
-
-## Refreshing the Data
-
-The dashboard ships with sample data. To pull fresh trends, you need an [Apify](https://apify.com) account and API token.
-
-### Using the built-in search
-
-1. Sign up at [apify.com](https://apify.com) (free tier available)
-2. Copy your API token from Settings > Integrations
-3. Open the dashboard, click **Settings**, paste your token
-4. Type a niche in the search bar and hit **Search Reels**
-5. The dashboard calls the Apify Instagram Hashtag Scraper and displays results
-
-### Using Apify API directly
-
 ```bash
-# Run the Instagram hashtag scraper
-curl -X POST "https://api.apify.com/v2/acts/apify~instagram-hashtag-scraper/runs?token=YOUR_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"hashtags": ["fitness"], "resultsLimit": 20}'
-
-# Fetch results (replace DATASET_ID from response)
-curl "https://api.apify.com/v2/datasets/DATASET_ID/items?token=YOUR_TOKEN&format=json"
+git clone https://github.com/lukejbyrne/viral-reels-scout.git
 ```
 
-### Using Claude Code + Apify MCP
+Open `dashboard.html` in your browser. Sample data loads immediately.
 
-1. Connect Apify to Claude Code:
-   ```bash
-   claude mcp add --transport http apify https://mcp.apify.com
-   ```
-2. Ask Claude Code:
-   ```
-   Search Instagram for trending reels about fitness and cooking.
-   Get URLs, view counts, likes, and captions. Save as reels_data.json.
-   ```
+### Live Search
 
-## Tech Stack
+1. Sign up at [apify.com](https://apify.com) (free tier works)
+2. Copy your API token
+3. Dashboard → **Settings** → paste token → **Save**
+4. Search any niche
 
-- **Frontend:** Single HTML file, vanilla JS, no build step
-- **Server:** `server.js` -- zero-dependency Node.js server for persistent stars
-- **Data:** [Apify](https://apify.com) Instagram scraper (free tier available)
-- **Embeds:** Thumbnail previews with click-through to Instagram
+### Persistent Favorites (Optional)
 
-## License
+```bash
+node server.js
+```
 
-MIT
+Open `http://localhost:3001`. Stars save to `stars.json` on disk.
+
+## Modify With Claude Code
+
+- `"Add engagement rate — likes + comments divided by views"`
+- `"Export starred Reels as CSV"`
+- `"Add side-by-side comparison with TikTok for the same niche"`
+- `"Add date range filter"`
+
+See [LESSON.md](LESSON.md) for the full guide.
+
+## Deploy
+
+Drag the folder to [app.netlify.com/drop](https://app.netlify.com/drop). Your Apify token stays in localStorage — never in deployed code.
+
+## Part of Build with Luke
+
+This is one of 22 apps inside [Build with Luke](https://www.skool.com/luke). Clone it, customize it, ship it.
