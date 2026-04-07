@@ -383,7 +383,7 @@ function goHome() {
 }
 
 // Niche management
-const defaultNiches = ['Health & Fitness', 'Business', 'Cooking', 'Real Estate', 'Fashion', 'Gaming', 'Beauty', 'Travel', 'Finance', 'Pets', 'Comedy', 'Motivation'];
+const defaultNiches = ['Health & Fitness', 'Business', 'Cooking', 'Real Estate', 'Travel', 'Fashion', 'Tech', 'Comedy', 'Beauty', 'Motivation'];
 
 function getNiches() {
   try {
@@ -586,12 +586,20 @@ function saveToken() {
 // Load saved token on start
 (function() {
   const saved = localStorage.getItem('apify_token');
-  if (saved) document.getElementById('apify-token').value = saved;
+  if (saved) {
+    document.getElementById('apify-token').value = saved;
+    document.getElementById('token-status').textContent = 'API ready';
+    document.getElementById('token-status').style.color = '#22c55e';
+  }
   const savedCount = localStorage.getItem('ig_results_count');
   if (savedCount) document.getElementById('results-count').value = savedCount;
+  const savedNiches = localStorage.getItem('ig_niches');
+  if (savedNiches) {
+    try { document.getElementById('niches-input').value = JSON.parse(savedNiches).join(', '); } catch {}
+  }
 })();
 
-// Search niche via Apify Instagram Reels Scraper
+// Search niche via Apify Instagram Search Reels
 async function searchNiche() {
   const query = document.getElementById('niche-input').value.trim();
   if (!query) return;
@@ -610,52 +618,36 @@ async function searchNiche() {
   btn.disabled = true;
   btn.textContent = 'Searching...';
   loadingBar.classList.add('active');
-  document.getElementById('subtitle').textContent = `Searching Instagram Reels for "${query}"...`;
+  document.getElementById('subtitle').textContent = `Searching Instagram for "${query}"...`;
 
   const resultsLimit = getResultsCount();
+  const maxPages = Math.max(1, Math.ceil(resultsLimit / 12));
 
   try {
-    // Use apify/instagram-hashtag-scraper to find reels by hashtag/keyword
-    // This actor searches Instagram hashtags and returns posts including reels
+    // Use patient_discovery~instagram-search-reels for keyword search
     const runResp = await fetch(
-      `https://api.apify.com/v2/acts/apify~instagram-hashtag-scraper/runs?token=${token}`,
+      `https://api.apify.com/v2/acts/patient_discovery~instagram-search-reels/runs?token=${token}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          hashtags: [query.replace(/\s+/g, '').toLowerCase()],
-          resultsLimit: resultsLimit,
-          resultsType: "posts"
+          query: query,
+          maxPages: maxPages
         })
       }
     );
 
     if (!runResp.ok) {
-      // Fallback: try apify/instagram-scraper (older but widely available)
-      const fallbackResp = await fetch(
-        `https://api.apify.com/v2/acts/apify~instagram-scraper/runs?token=${token}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            search: query,
-            searchType: "hashtag",
-            resultsLimit: resultsLimit,
-            searchLimit: 1
-          })
-        }
-      );
-      if (!fallbackResp.ok) throw new Error('Failed to start scraper. Check your Apify token and try again.');
-      var runData = await fallbackResp.json();
-    } else {
-      var runData = await runResp.json();
+      const errBody = await runResp.json().catch(() => ({}));
+      throw new Error(errBody.error?.message || 'Failed to start scraper. Check your Apify token and try again.');
     }
+    const runData = await runResp.json();
 
     const datasetId = runData.data?.defaultDatasetId;
     if (!datasetId) throw new Error('No dataset returned from Apify');
 
     // Poll for results
-    btn.textContent = 'Scraping Instagram...';
+    btn.textContent = 'Searching Instagram...';
     let items = [];
     for (let attempt = 0; attempt < 30; attempt++) {
       await new Promise(r => setTimeout(r, 3000));
@@ -664,35 +656,31 @@ async function searchNiche() {
       );
       items = await itemsResp.json();
       if (items.length > 0) break;
-      btn.textContent = `Scraping Instagram... (${(attempt+1)*3}s)`;
+      btn.textContent = `Searching Instagram... (${(attempt+1)*3}s)`;
     }
 
-    if (items.length === 0) throw new Error('No results found. Try a different search term.');
+    if (items.length === 0) throw new Error('No reels found for this search. Try a different keyword.');
 
-    // Transform to our format -- handle multiple possible Apify actor output formats
+    // Transform to our format
     const niceName = query.charAt(0).toUpperCase() + query.slice(1);
     const newReels = items.map(item => {
-      // Handle different field naming conventions from various Apify actors
-      const id = item.id || item.shortCode || item.pk || ('ig_' + Math.random().toString(36).slice(2));
-      const caption = item.caption || item.text || item.description || '';
-      const likes = item.likesCount || item.likes || item.diggCount || 0;
-      const views = item.videoViewCount || item.viewsCount || item.playCount || item.views || 0;
-      const comments = item.commentsCount || item.comments || item.commentCount || 0;
-      const username = item.ownerUsername || item.username || item.author || item.ownerFullName || '';
-      const fullName = item.ownerFullName || item.fullName || item.authorNickname || username;
-      const url = item.url || item.webVideoUrl || (item.shortCode ? `https://www.instagram.com/reel/${item.shortCode}/` : '');
-      const displayUrl = item.displayUrl || item.thumbnailUrl || item.coverUrl || '';
-      const timestamp = item.timestamp || item.createTimeISO || item.takenAtTimestamp
-        ? new Date((item.takenAtTimestamp || 0) * 1000).toISOString()
-        : new Date().toISOString();
-      const duration = item.videoDuration || item.duration || item.videoMeta?.duration || 0;
-      const type = item.type || (item.isVideo ? 'Reel' : 'Post');
+      const id = String(item.id || 'ig_' + Math.random().toString(36).slice(2));
+      const code = item.code || '';
+      const caption = item.caption || '';
+      const likes = item.like_count || 0;
+      const views = item.play_count || 0;
+      const comments = item.comment_count || 0;
+      const username = item.user?.username || '';
+      const url = code ? `https://www.instagram.com/reel/${code}/` : '';
+      const displayUrl = item.thumbnail_url || '';
+      const timestamp = item.taken_at ? new Date(item.taken_at * 1000).toISOString() : new Date().toISOString();
+      const duration = item.video_duration || 0;
 
       return {
         id, category: niceName, caption, likesCount: likes,
         viewsCount: views, commentsCount: comments,
-        username, fullName, url, displayUrl, timestamp,
-        videoDuration: duration, type
+        username, fullName: username, url, displayUrl, timestamp,
+        videoDuration: Math.round(duration), type: 'Reel'
       };
     }).filter(v => v.id && v.url);
 
