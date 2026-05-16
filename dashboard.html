@@ -3,46 +3,80 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Viral Reels Scout</title>
+<title>Viral Scout</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #000; color: #e0e0e0; }
 
+  /* Platform tabs */
+  .platform-tabs {
+    display: flex; gap: 0; background: #050505; border-bottom: 1px solid #1a1a1a;
+    padding: 0 40px; position: sticky; top: 0; z-index: 200;
+  }
+  .platform-tab {
+    padding: 14px 28px; border: none; background: transparent;
+    color: #555; font-size: 0.95em; font-weight: 600; cursor: pointer;
+    transition: all 0.2s; border-bottom: 3px solid transparent;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .platform-tab:hover { color: #999; background: #0a0a0a; }
+  .platform-tab.active { color: #fff; border-bottom-color: var(--accent); }
+  .platform-tab .tab-icon { font-size: 1.1em; }
+
+  /* Per-platform accent color via CSS variable */
+  :root { --accent: #3b82f6; }
+  body.platform-tiktok { --accent: #3b82f6; }
+  body.platform-reels { --accent: #e1306c; }
+  body.platform-shorts { --accent: #ff0033; }
+
   /* Header */
   .header {
-    padding: 32px 40px 24px;
+    padding: 24px 40px 20px;
     background: linear-gradient(135deg, #0a0a0a, #111);
     border-bottom: 1px solid #1a1a1a;
-    position: sticky; top: 0; z-index: 100;
+    position: sticky; top: 49px; z-index: 100;
   }
-  .header h1 { font-size: 1.8em; color: #fff; margin-bottom: 4px; cursor: pointer; }
-  .header h1:hover { color: #e1306c; }
-  .header h1 .ig-gradient {
-    background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
+  .header h1 { font-size: 1.6em; color: #fff; margin-bottom: 4px; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+  .header h1:hover { color: var(--accent); }
   .header p { color: #666; font-size: 0.9em; }
 
-  /* Search */
-  .search-row {
-    display: flex; gap: 8px; margin-top: 16px; align-items: center;
+  /* Instagram gradient text */
+  .ig-gradient {
+    background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
   }
+
+  /* YouTube icon */
+  .yt-icon {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 32px; height: 22px; background: #ff0033; border-radius: 5px; position: relative;
+  }
+  .yt-icon::after {
+    content: ''; display: block; width: 0; height: 0;
+    border-left: 8px solid #fff; border-top: 5px solid transparent; border-bottom: 5px solid transparent; margin-left: 2px;
+  }
+
+  /* Search */
+  .search-row { display: flex; gap: 8px; margin-top: 14px; align-items: center; }
   #niche-input {
     flex: 1; padding: 10px 16px; border-radius: 10px; border: 1px solid #333;
-    background: #111; color: #fff; font-size: 0.95em; outline: none;
-    transition: border-color 0.2s;
+    background: #111; color: #fff; font-size: 0.95em; outline: none; transition: border-color 0.2s;
   }
-  #niche-input:focus { border-color: #e1306c; }
+  #niche-input:focus { border-color: var(--accent); }
   #niche-input::placeholder { color: #444; }
   #search-btn {
     padding: 10px 20px; border-radius: 10px; border: none;
-    background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
-    color: #fff; font-weight: 600; font-size: 0.85em;
+    background: var(--accent); color: #fff; font-weight: 600; font-size: 0.85em;
     cursor: pointer; transition: opacity 0.2s; white-space: nowrap;
   }
   #search-btn:hover { opacity: 0.85; }
   #search-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  #brief-btn {
+    padding: 10px 16px; border-radius: 10px; border: 1px solid #4a2a12;
+    background: #24160b; color: #fdba74; font-weight: 600; font-size: 0.85em;
+    cursor: pointer; transition: all 0.2s; white-space: nowrap;
+  }
+  #brief-btn:hover { background: #35200f; color: #fed7aa; border-color: #6b3a17; }
   #settings-btn {
     padding: 10px 16px; border-radius: 10px; border: 1px solid #333;
     background: transparent; color: #666; font-size: 0.85em; cursor: pointer;
@@ -58,8 +92,7 @@
   .settings-panel label { font-size: 0.8em; color: #888; margin-right: 4px; }
   .settings-panel input {
     flex: 1; min-width: 200px; padding: 8px 12px; border-radius: 8px;
-    border: 1px solid #333; background: #111; color: #fff; font-size: 0.85em;
-    font-family: monospace;
+    border: 1px solid #333; background: #111; color: #fff; font-size: 0.85em; font-family: monospace;
   }
   .settings-panel button {
     padding: 8px 16px; border-radius: 8px; border: none;
@@ -68,29 +101,23 @@
   #token-status { font-size: 0.8em; color: #22c55e; }
 
   /* Filters */
-  .filters {
-    display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; align-items: center;
-  }
+  .filters { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; align-items: center; }
   .filter-btn {
     padding: 6px 16px; border-radius: 20px; border: 1px solid #333;
-    background: transparent; color: #999; cursor: pointer; font-size: 0.85em;
-    transition: all 0.2s;
+    background: transparent; color: #999; cursor: pointer; font-size: 0.85em; transition: all 0.2s;
   }
   .filter-btn:hover { border-color: #555; color: #fff; }
   .filter-btn.active { background: #fff; color: #000; border-color: #fff; font-weight: 600; }
-
   .sort-select {
     margin-left: auto; padding: 6px 12px; border-radius: 8px;
-    border: 1px solid #333; background: #111; color: #999; font-size: 0.85em;
-    cursor: pointer;
+    border: 1px solid #333; background: #111; color: #999; font-size: 0.85em; cursor: pointer;
   }
 
   /* Grid */
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 14px;
-    padding: 20px 40px 60px;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 14px; padding: 20px 40px 60px;
   }
 
   /* Card */
@@ -99,30 +126,23 @@
     overflow: hidden; transition: all 0.2s;
   }
   .card:hover { border-color: #333; transform: translateY(-2px); }
-
   .card-embed {
-    width: 100%; aspect-ratio: 9/16; background: #0a0a0a;
-    position: relative; overflow: hidden; cursor: pointer;
-    max-height: 400px;
+    width: 100%; aspect-ratio: 9/14; background: #0a0a0a;
+    position: relative; overflow: hidden; cursor: pointer; max-height: 420px;
   }
   .card-embed iframe { width: 100%; height: 100%; border: none; }
-  .card-embed .thumbnail {
-    width: 100%; height: 100%; object-fit: cover;
-    transition: transform 0.3s;
-  }
+  .card-embed .thumbnail { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
   .card-embed:hover .thumbnail { transform: scale(1.03); }
   .card-embed .placeholder {
     position: absolute; inset: 0; display: flex; flex-direction: column;
     align-items: center; justify-content: center; gap: 8px;
-    background: linear-gradient(135deg, #0a0a0a, #1a0a15);
-    cursor: pointer; transition: background 0.2s;
+    background: linear-gradient(135deg, #0a0a0a, #151520); cursor: pointer; transition: background 0.2s;
   }
-  .card-embed .placeholder:hover { background: linear-gradient(135deg, #111, #2a1020); }
+  .card-embed .placeholder:hover { background: linear-gradient(135deg, #111, #1a1a2e); }
   .play-icon {
     width: 56px; height: 56px; border-radius: 50%;
     background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.4em;
+    display: flex; align-items: center; justify-content: center; font-size: 1.4em;
   }
   .placeholder-text { color: #555; font-size: 0.8em; }
   .thumbnail-overlay {
@@ -133,21 +153,16 @@
   .card-embed:hover .thumbnail-overlay { opacity: 1; }
 
   .card-body { padding: 12px; }
-
   .card-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
   .card-category {
     font-size: 0.7em; padding: 3px 10px; border-radius: 12px;
     font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
   }
-
   .card-author { color: #666; font-size: 0.8em; }
-
   .card-text {
-    color: #999; font-size: 0.85em; line-height: 1.4;
-    margin-bottom: 12px;
+    color: #999; font-size: 0.85em; line-height: 1.4; margin-bottom: 12px;
     display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
   }
-
   .card-stats { display: flex; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
   .stat { display: flex; flex-direction: column; }
   .stat-value { font-weight: 700; color: #fff; font-size: 0.85em; }
@@ -159,75 +174,96 @@
     font-size: 0.75em; font-weight: 600; cursor: pointer; transition: all 0.2s;
     text-align: center; text-decoration: none; display: block;
   }
-  .btn-copy { background: #1a0a1a; color: #e1306c; }
-  .btn-copy:hover { background: #2a1020; }
+  .btn-copy { background: #1a1a2e; color: #a78bfa; }
+  .btn-copy:hover { background: #252540; }
   .btn-copy.copied { background: #102010; color: #86efac; }
+  .btn-pollo { background: #24160b; color: #fdba74; }
+  .btn-pollo:hover { background: #35200f; color: #fed7aa; }
   .btn-open { background: #1a1a1a; color: #999; }
   .btn-open:hover { background: #252525; color: #fff; }
 
   .duration-badge {
     position: absolute; bottom: 8px; right: 8px;
     background: rgba(0,0,0,0.8); color: #fff; padding: 2px 8px;
-    border-radius: 4px; font-size: 0.75em; font-weight: 600;
-    z-index: 2;
+    border-radius: 4px; font-size: 0.75em; font-weight: 600; z-index: 2;
   }
-
-  /* Star / Favorites */
   .star-btn {
     position: absolute; top: 8px; right: 8px; z-index: 3;
     width: 32px; height: 32px; border-radius: 50%;
     background: rgba(0,0,0,0.6); border: none;
     color: #555; font-size: 1.1em; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center; transition: all 0.2s;
   }
   .star-btn:hover { color: #fcd34d; background: rgba(0,0,0,0.8); }
   .star-btn.starred { color: #fcd34d; }
 
-  /* Reel type badge */
-  .reel-type-badge {
+  .platform-badge {
     position: absolute; top: 8px; left: 8px; z-index: 3;
     padding: 3px 8px; border-radius: 6px; font-size: 0.65em;
     font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
-    background: rgba(225,48,108,0.85); color: #fff;
+    background: rgba(0,0,0,0.7); color: #fff;
+  }
+  .views-badge {
+    position: absolute; top: 8px; left: 8px; z-index: 3;
+    background: rgba(0,0,0,0.7); color: #fff; padding: 3px 8px;
+    border-radius: 6px; font-size: 0.7em; font-weight: 600;
+    display: flex; align-items: center; gap: 4px;
   }
 
-  /* Empty state */
-  .empty {
-    grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: #444;
-  }
-  .empty .empty-icon { font-size: 3em; margin-bottom: 12px; opacity: 0.3; }
-
-  /* Loading spinner */
+  /* Loading */
   .loading-bar {
     position: fixed; top: 0; left: 0; height: 3px; z-index: 1000;
-    background: linear-gradient(90deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
-    transition: width 0.3s;
+    background: linear-gradient(90deg, var(--accent), #fff, var(--accent));
     display: none;
   }
   .loading-bar.active { display: block; animation: loadPulse 1.5s ease-in-out infinite; }
-  @keyframes loadPulse {
-    0% { width: 10%; }
-    50% { width: 70%; }
-    100% { width: 90%; }
+  @keyframes loadPulse { 0% { width: 10%; } 50% { width: 70%; } 100% { width: 90%; } }
+
+  .loading-spinner { grid-column: 1 / -1; text-align: center; padding: 60px 20px; }
+  .spinner {
+    display: inline-block; width: 40px; height: 40px;
+    border: 3px solid #222; border-top-color: var(--accent);
+    border-radius: 50%; animation: spin 0.8s linear infinite;
   }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { color: #555; margin-top: 12px; font-size: 0.9em; }
+
+  .empty { grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: #444; }
+  .empty .empty-icon { font-size: 3em; margin-bottom: 12px; opacity: 0.3; }
 
   @media (max-width: 600px) {
     .grid { grid-template-columns: 1fr; padding: 16px; }
-    .header { padding: 20px 16px 16px; }
+    .header { padding: 16px 16px 12px; }
+    .search-row { flex-wrap: wrap; }
+    #niche-input { flex-basis: 100%; }
+    .platform-tabs { padding: 0 16px; }
+    .platform-tab { padding: 12px 16px; font-size: 0.85em; }
   }
 </style>
 </head>
-<body>
+<body class="platform-reels">
 
 <div class="loading-bar" id="loading-bar"></div>
 
+<div class="platform-tabs">
+  <button class="platform-tab" data-platform="tiktok" onclick="switchPlatform('tiktok')">
+    <span class="tab-icon">&#9835;</span> TikTok
+  </button>
+  <button class="platform-tab active" data-platform="reels" onclick="switchPlatform('reels')">
+    <span class="tab-icon">&#9673;</span> Reels
+  </button>
+  <button class="platform-tab" data-platform="shorts" onclick="switchPlatform('shorts')">
+    <span class="tab-icon">&#9654;</span> Shorts
+  </button>
+</div>
+
 <div class="header">
-  <h1 onclick="goHome()">Viral <span class="ig-gradient">Reels</span> Scout</h1>
-  <p id="subtitle">Browse trending Instagram Reels -- search your niche, preview thumbnails, star your favorites</p>
+  <h1 id="page-title" onclick="goHome()">Viral <span class="ig-gradient">Reels</span> Scout</h1>
+  <p id="subtitle">Browse trending Instagram Reels, find repeatable hooks, then build video directions</p>
   <div class="search-row">
     <input type="text" id="niche-input" placeholder="Search a niche... e.g. fitness, cooking, real estate" />
     <button id="search-btn" onclick="searchNiche()">Search Reels</button>
+    <button id="brief-btn" onclick="copyStarredPolloPrompt(this)">Video brief</button>
     <button id="settings-btn" onclick="toggleSettings()">Settings</button>
   </div>
   <div class="settings-panel" id="settings-panel">
@@ -240,6 +276,14 @@
       </div>
     </div>
     <div style="width:100%; margin-bottom:10px;">
+      <label>Results per search <span style="color:#555">(default: 20)</span></label>
+      <div style="display:flex; gap:8px; margin-top:4px;">
+        <input type="number" id="results-count" style="font-family:monospace; max-width:80px;" placeholder="20" min="5" max="50" value="20" />
+        <button onclick="saveResultsCount()">Save</button>
+        <span id="results-status"></span>
+      </div>
+    </div>
+    <div style="width:100%;">
       <label>Quick Search Niches <span style="color:#555">(comma-separated)</span></label>
       <div style="display:flex; gap:8px; margin-top:4px;">
         <input type="text" id="niches-input" style="font-family:-apple-system,sans-serif;" placeholder="e.g. Fitness, Business, Cooking" />
@@ -247,53 +291,97 @@
         <span id="niches-status"></span>
       </div>
     </div>
-    <div style="width:100%;">
-      <label>Results per search <span style="color:#555">(default: 20)</span></label>
-      <div style="display:flex; gap:8px; margin-top:4px;">
-        <input type="number" id="results-count" style="font-family:monospace; max-width:80px;" placeholder="20" min="5" max="50" />
-        <button onclick="saveResultsCount()">Save</button>
-        <span id="results-status"></span>
-      </div>
-    </div>
   </div>
   <div class="filters" id="filters-row">
-    <select class="sort-select" id="sort-select">
-      <option value="likes">Most Liked</option>
-      <option value="views">Most Viewed</option>
-      <option value="comments">Most Commented</option>
-      <option value="recent">Most Recent</option>
-    </select>
+    <select class="sort-select" id="sort-select"></select>
   </div>
 </div>
 
 <div class="grid" id="grid"></div>
 
 <script>
-// Sample data -- ships with the dashboard so it works out of the box
-const sampleReels = [
-  {"id":"reel_001","category":"Fitness","caption":"5-minute morning routine that changed my life #fitness #morningroutine #workout #fyp","likesCount":284000,"viewsCount":3200000,"commentsCount":4120,"username":"fitcoach_maria","fullName":"Maria Fitness","url":"https://www.instagram.com/reel/example1/","displayUrl":"","timestamp":"2026-03-28T10:00:00.000Z","videoDuration":32,"type":"Reel"},
-  {"id":"reel_002","category":"Cooking","caption":"One-pot pasta that takes 15 minutes. You need this recipe #cooking #easyrecipes #pasta #foodtok","likesCount":195000,"viewsCount":2800000,"commentsCount":3850,"username":"chef_daily","fullName":"Chef Daily","url":"https://www.instagram.com/reel/example2/","displayUrl":"","timestamp":"2026-03-27T14:30:00.000Z","videoDuration":45,"type":"Reel"},
-  {"id":"reel_003","category":"Tech","caption":"This AI tool writes your emails in 3 seconds. Here's how #tech #ai #productivity #hack","likesCount":312000,"viewsCount":4100000,"commentsCount":6200,"username":"techbro_daily","fullName":"Tech Updates","url":"https://www.instagram.com/reel/example3/","displayUrl":"","timestamp":"2026-03-29T09:15:00.000Z","videoDuration":28,"type":"Reel"},
-  {"id":"reel_004","category":"Travel","caption":"Hidden beach in Bali nobody talks about. Save this for later #travel #bali #hiddenplaces #wanderlust","likesCount":410000,"viewsCount":5600000,"commentsCount":8100,"username":"wanderlust_sam","fullName":"Sam Travels","url":"https://www.instagram.com/reel/example4/","displayUrl":"","timestamp":"2026-03-26T18:00:00.000Z","videoDuration":22,"type":"Reel"},
-  {"id":"reel_005","category":"Business","caption":"I made $10K in 30 days with this side hustle. No experience needed #business #sidehustle #money #entrepreneur","likesCount":178000,"viewsCount":2200000,"commentsCount":5400,"username":"hustlelab","fullName":"Hustle Lab","url":"https://www.instagram.com/reel/example5/","displayUrl":"","timestamp":"2026-03-25T12:00:00.000Z","videoDuration":55,"type":"Reel"},
-  {"id":"reel_006","category":"Fashion","caption":"3 outfits from 6 basics. Capsule wardrobe magic #fashion #ootd #capsulewardrobe #style","likesCount":225000,"viewsCount":3100000,"commentsCount":2900,"username":"styled_by_ana","fullName":"Ana Style","url":"https://www.instagram.com/reel/example6/","displayUrl":"","timestamp":"2026-03-30T08:00:00.000Z","videoDuration":38,"type":"Reel"},
-  {"id":"reel_007","category":"Fitness","caption":"The ONLY 3 exercises you need for a flat stomach. No equipment #abs #homeworkout #fitness #flatstomach","likesCount":520000,"viewsCount":7200000,"commentsCount":9800,"username":"abs_daily","fullName":"Abs Daily","url":"https://www.instagram.com/reel/example7/","displayUrl":"","timestamp":"2026-04-01T07:00:00.000Z","videoDuration":42,"type":"Reel"},
-  {"id":"reel_008","category":"Comedy","caption":"POV: You tell your mom you're not hungry and she takes it personally #comedy #relatable #mom #funny","likesCount":680000,"viewsCount":9400000,"commentsCount":12500,"username":"laughdaily_","fullName":"Laugh Daily","url":"https://www.instagram.com/reel/example8/","displayUrl":"","timestamp":"2026-04-02T16:30:00.000Z","videoDuration":18,"type":"Reel"},
-  {"id":"reel_009","category":"Beauty","caption":"Glass skin in 3 steps. Korean skincare routine that actually works #beauty #skincare #glassskin #kbeauty","likesCount":340000,"viewsCount":4500000,"commentsCount":5600,"username":"glowup_queen","fullName":"Glow Up","url":"https://www.instagram.com/reel/example9/","displayUrl":"","timestamp":"2026-03-31T11:00:00.000Z","videoDuration":35,"type":"Reel"},
-  {"id":"reel_010","category":"Pets","caption":"My golden retriever learned to close the fridge. I didn't teach him this #pets #dog #goldenretriever #funny","likesCount":890000,"viewsCount":12000000,"commentsCount":15200,"username":"goodboy_max","fullName":"Max The Golden","url":"https://www.instagram.com/reel/example10/","displayUrl":"","timestamp":"2026-04-03T13:00:00.000Z","videoDuration":14,"type":"Reel"},
-  {"id":"reel_011","category":"Tech","caption":"iPhone hack 99% of people don't know about. Try this now #apple #iphone #hack #techtips","likesCount":445000,"viewsCount":6100000,"commentsCount":7300,"username":"techbro_daily","fullName":"Tech Updates","url":"https://www.instagram.com/reel/example11/","displayUrl":"","timestamp":"2026-04-01T20:00:00.000Z","videoDuration":24,"type":"Reel"},
-  {"id":"reel_012","category":"Motivation","caption":"You are exactly where you need to be. Trust the process. #motivation #mindset #success #grind","likesCount":156000,"viewsCount":1900000,"commentsCount":2100,"username":"mindset_ceo","fullName":"Mindset CEO","url":"https://www.instagram.com/reel/example12/","displayUrl":"","timestamp":"2026-03-29T06:00:00.000Z","videoDuration":30,"type":"Reel"},
-  {"id":"reel_013","category":"Cooking","caption":"Cloud bread but make it savory. This is insane #cloudbread #recipe #cooking #viral","likesCount":267000,"viewsCount":3400000,"commentsCount":4200,"username":"viral_bites","fullName":"Viral Bites","url":"https://www.instagram.com/reel/example13/","displayUrl":"","timestamp":"2026-04-02T09:00:00.000Z","videoDuration":48,"type":"Reel"},
-  {"id":"reel_014","category":"Travel","caption":"$50/night treehouse in Colombia. The views are unreal #travel #colombia #budget #treehouse","likesCount":380000,"viewsCount":4800000,"commentsCount":6700,"username":"budget_traveler","fullName":"Budget Travel","url":"https://www.instagram.com/reel/example14/","displayUrl":"","timestamp":"2026-04-03T10:00:00.000Z","videoDuration":26,"type":"Reel"},
-  {"id":"reel_015","category":"Comedy","caption":"When you accidentally send the screenshot to the person in the screenshot #comedy #texting #fail #relatable","likesCount":720000,"viewsCount":10500000,"commentsCount":18000,"username":"laughdaily_","fullName":"Laugh Daily","url":"https://www.instagram.com/reel/example15/","displayUrl":"","timestamp":"2026-04-04T15:00:00.000Z","videoDuration":12,"type":"Reel"},
-  {"id":"reel_016","category":"Business","caption":"Stop trading time for money. Build systems instead. Here are 3 you can start today #business #passiveincome #systems","likesCount":198000,"viewsCount":2500000,"commentsCount":3800,"username":"biz_blueprint","fullName":"Biz Blueprint","url":"https://www.instagram.com/reel/example16/","displayUrl":"","timestamp":"2026-03-28T14:00:00.000Z","videoDuration":58,"type":"Reel"},
-  {"id":"reel_017","category":"Pets","caption":"Cat vs cucumber round 47. He still hasn't learned #cats #funny #pets #catsoftiktok","likesCount":540000,"viewsCount":7800000,"commentsCount":9200,"username":"cats_unleashed","fullName":"Cats Unleashed","url":"https://www.instagram.com/reel/example17/","displayUrl":"","timestamp":"2026-04-01T12:00:00.000Z","videoDuration":9,"type":"Reel"},
-  {"id":"reel_018","category":"Fashion","caption":"Thrift flip: $5 jacket to designer look. Full tutorial #thriftflip #fashion #diy #upcycle","likesCount":210000,"viewsCount":2900000,"commentsCount":3500,"username":"thrift_queen","fullName":"Thrift Queen","url":"https://www.instagram.com/reel/example18/","displayUrl":"","timestamp":"2026-03-30T16:00:00.000Z","videoDuration":44,"type":"Reel"},
-  {"id":"reel_019","category":"Beauty","caption":"This $8 drugstore product replaced my $60 serum. Dermatologist approved #beauty #skincare #drugstorefinds #dupe","likesCount":290000,"viewsCount":3700000,"commentsCount":4800,"username":"skinfluencer","fullName":"Skin Fluencer","url":"https://www.instagram.com/reel/example19/","displayUrl":"","timestamp":"2026-04-02T11:00:00.000Z","videoDuration":33,"type":"Reel"},
-  {"id":"reel_020","category":"Motivation","caption":"1 year ago I was sleeping in my car. Today I signed a 6-figure deal. Keep going. #motivation #comeback #success","likesCount":460000,"viewsCount":5900000,"commentsCount":7100,"username":"risegrind","fullName":"Rise & Grind","url":"https://www.instagram.com/reel/example20/","displayUrl":"","timestamp":"2026-04-04T08:00:00.000Z","videoDuration":40,"type":"Reel"}
-];
+// ─── CURRENT STATE ───
+const DEFAULT_PLATFORM = 'reels';
+let currentPlatform = DEFAULT_PLATFORM;
+let currentVideos = [];
+let activeScenario = 'ugc';
+let pendingSearchCategory = '';
 
+const scenarioConfig = {
+  ugc: {
+    label: 'UGC + unboxing',
+    outputs: ['UGC-style opener', 'unboxing-style clip', 'creator review variant', 'product payoff shot'],
+  },
+  promo: {
+    label: 'Product promo',
+    outputs: ['product promo', 'benefit-led ad', 'problem/solution cut', 'cinematic product moment'],
+  },
+  review: {
+    label: 'Review + explainer',
+    outputs: ['review-style clip', 'explainer/ad variant', 'before/after angle', 'objection-handling cut'],
+  },
+  agency: {
+    label: 'Agency variants',
+    outputs: ['UGC concept', 'product promo', 'review clip', 'unboxing clip', 'explainer/ad', 'agency pitch variant'],
+  },
+};
+
+// ─── SAMPLE DATA ───
+const sampleData = {
+  tiktok: [{"id":"7531345808789163294","category":"AI Viral","text":"#trending #ai #viralvideo #foryoupage #growmyaccount ","playCount":84500000,"diggCount":1100000,"shareCount":105000,"commentCount":9452,"url":"https://www.tiktok.com/@ai.shorts.hub22/video/7531345808789163294","author":"ai.shorts.hub22","authorNickname":"Ai Shorts Hub","coverUrl":"","createTimeISO":"2025-07-26T11:09:12.000Z","duration":50},{"id":"7245743678537387282","category":"Tech Gadgets","text":"The Redmagic 8Pro+ places Optimus Prime in thr palm of your hands","playCount":36000000,"diggCount":1900000,"shareCount":60800,"commentCount":8517,"url":"https://www.tiktok.com/@sugiswagcorp/video/7245743678537387282","author":"sugiswagcorp","authorNickname":"SugiSwag","coverUrl":"","createTimeISO":"2023-06-17T19:46:11.000Z","duration":37},{"id":"7583254351435664653","category":"AI Viral","text":"#trending #ai #viralvideo #1million #fyppppppppppppppppppppppp ","playCount":11700000,"diggCount":129200,"shareCount":12800,"commentCount":1044,"url":"https://www.tiktok.com/@mrbilli8/video/7583254351435664653","author":"mrbilli8","authorNickname":"Ai","coverUrl":"","createTimeISO":"2025-12-13T08:20:49.000Z","duration":38},{"id":"7615050845838691614","category":"Satisfying","text":"#asmrsounds ASMR you can feel through the screen\u2026 I 3D printed a twisty fidget dragon egg","playCount":11700000,"diggCount":189400,"shareCount":47700,"commentCount":1434,"url":"https://www.tiktok.com/@abhi3dmad/video/7615050845838691614","author":"abhi3dmad","authorNickname":"abhi3dmad","coverUrl":"","createTimeISO":"2026-03-09T00:46:47.000Z","duration":12},{"id":"7581072844885363982","category":"AI Viral","text":"#trending #ai #viralvideo #foryoupage #growmyaccount ","playCount":11000000,"diggCount":238400,"shareCount":52100,"commentCount":950,"url":"https://www.tiktok.com/@huntrixjanuary1/video/7581072844885363982","author":"huntrixjanuary1","authorNickname":"Ai","coverUrl":"","createTimeISO":"2025-12-07T11:16:18.000Z","duration":35},{"id":"7454405060567633183","category":"Satisfying","text":"Mr. Pear has parasites? #FunnyToys #SatisfyingVideo #AmazingToys","playCount":8200000,"diggCount":68000,"shareCount":4678,"commentCount":4778,"url":"https://www.tiktok.com/@msfuntoy/video/7454405060567633183","author":"msfuntoy","authorNickname":"msfuntoy","coverUrl":"","createTimeISO":"2024-12-31T02:59:00.000Z","duration":48},{"id":"7617913004453072141","category":"Satisfying","text":"Pulling a Grape Stem in Ultra Macro So Satisfying #ASMR #oddlysatisfying","playCount":7400000,"diggCount":104100,"shareCount":2141,"commentCount":329,"url":"https://www.tiktok.com/@the_macro_universe/video/7617913004453072141","author":"the_macro_universe","authorNickname":"the_macro_universe","coverUrl":"","createTimeISO":"2026-03-17T00:20:00.000Z","duration":8},{"id":"7345841984399265032","category":"Tech Gadgets","text":"Gadgets that will WOW you! #TechTok #GadgetsOfTiktok #MustHaveGadgets","playCount":4900000,"diggCount":23800,"shareCount":1588,"commentCount":750,"url":"https://www.tiktok.com/@temufinds080/video/7345841984399265032","author":"temufinds080","authorNickname":"LINK IN BIO","coverUrl":"","createTimeISO":"2024-03-13T13:38:41.000Z","duration":9},{"id":"7613930184676265246","category":"AI Viral","text":"Ai Funny video #1millionviews #Aivideo #viral #foryoupage","playCount":2900000,"diggCount":33400,"shareCount":4047,"commentCount":1030,"url":"https://www.tiktok.com/@contentaigenerator/video/7613930184676265246","author":"contentaigenerator","authorNickname":"Ai.Videogenerator","coverUrl":"","createTimeISO":"2026-03-06T00:18:06.000Z","duration":6},{"id":"7615624104170802452","category":"Satisfying","text":"Pulling 5 small worms and a BIG worm out of jelly #asmr #oddlysatisfying","playCount":2500000,"diggCount":131500,"shareCount":11000,"commentCount":2246,"url":"https://www.tiktok.com/@harupullasmr/video/7615624104170802452","author":"harupullasmr","authorNickname":"Haru Pull ASMR","coverUrl":"","createTimeISO":"2026-03-10T13:51:13.000Z","duration":18},{"id":"7418577281196641544","category":"AI Generated","text":"Learn how to make videos with Ai. Dancing leaves #tutorial. Viral video made with #ai for #free","playCount":562600,"diggCount":12700,"shareCount":3280,"commentCount":909,"url":"https://www.tiktok.com/@majiqq/video/7418577281196641544","author":"majiqq","authorNickname":"Majid | Ai + UX Design + Dev","coverUrl":"","createTimeISO":"2024-09-25T13:48:47.000Z","duration":31},{"id":"7620072682607938838","category":"AI Viral","text":"Tutorial on this viral Kalogeras Sister Trillium ai character swap trend!","playCount":379300,"diggCount":16400,"shareCount":1111,"commentCount":296,"url":"https://www.tiktok.com/@demonslayereditz_1/video/7620072682607938838","author":"demonslayereditz_1","authorNickname":"Demon Slayer Edits","coverUrl":"","createTimeISO":"2026-03-22T13:33:53.000Z","duration":54}],
+
+  reels: [{"id":"DKw2J6TMZd7","category":"Sports","caption":"Mastercard paid partnership. The beautiful game never stops #football #messi","likesCount":18000000,"viewsCount":1200000000,"commentsCount":245000,"username":"leomessi","fullName":"Leo Messi","url":"https://www.instagram.com/reel/DKw2J6TMZd7/","displayUrl":"","timestamp":"2026-02-15T12:00:00.000Z","videoDuration":30,"type":"Reel"},{"id":"DP8F5tdETXv","category":"Tech","caption":"Samsung Galaxy x collaboration #samsung #tech #unboxing","likesCount":12000000,"viewsCount":1100000000,"commentsCount":180000,"username":"sajaboreel","fullName":"Sajid Shaikh","url":"https://www.instagram.com/reel/DP8F5tdETXv/","displayUrl":"","timestamp":"2026-03-20T10:00:00.000Z","videoDuration":22,"type":"Reel"},{"id":"DGyFM8jq-va","category":"Travel","caption":"A tour of Vantara - where nature meets conservation","likesCount":15000000,"viewsCount":1000000000,"commentsCount":320000,"username":"narendramodi","fullName":"Narendra Modi","url":"https://www.instagram.com/reel/DGyFM8jq-va/","displayUrl":"","timestamp":"2026-01-10T08:00:00.000Z","videoDuration":45,"type":"Reel"},{"id":"C8CaBfWs1mr","category":"Sports","caption":"Mastercard - Priceless moments on and off the pitch #football","likesCount":16000000,"viewsCount":1000000000,"commentsCount":210000,"username":"leomessi","fullName":"Leo Messi","url":"https://www.instagram.com/reel/C8CaBfWs1mr/","displayUrl":"","timestamp":"2025-06-18T14:00:00.000Z","videoDuration":28,"type":"Reel"},{"id":"DOuM2pFiEsz","category":"Comedy","caption":"When you accidentally corrupt the trombone audio file #trombone #funny #music","likesCount":14000000,"viewsCount":936000000,"commentsCount":280000,"username":"anthony.butenyi","fullName":"Anthony Butenyi","url":"https://www.instagram.com/reel/DOuM2pFiEsz/","displayUrl":"","timestamp":"2026-03-25T16:00:00.000Z","videoDuration":15,"type":"Reel"},{"id":"DR6oQ_-DrJ2","category":"AI Viral","caption":"AI Trampoline jump gone wrong... or right? #ai #funny #trampoline","likesCount":9500000,"viewsCount":857000000,"commentsCount":150000,"username":"gorunmezkazalar","fullName":"Gorunmez Kazalar","url":"https://www.instagram.com/reel/DR6oQ_-DrJ2/","displayUrl":"","timestamp":"2026-04-05T11:00:00.000Z","videoDuration":12,"type":"Reel"},{"id":"DQCkNLtgqEe","category":"Music","caption":"New collaboration announcement coming soon... #music #edsheeran","likesCount":11000000,"viewsCount":775000000,"commentsCount":195000,"username":"teddysphotos","fullName":"Ed Sheeran","url":"https://www.instagram.com/reel/DQCkNLtgqEe/","displayUrl":"","timestamp":"2026-03-01T09:00:00.000Z","videoDuration":35,"type":"Reel"},{"id":"DP1Hi2LiHpX","category":"Creative","caption":"Creative typography art made with Canva - wait for the reveal #design #typography #canva","likesCount":8200000,"viewsCount":660000000,"commentsCount":120000,"username":"sarcasm_in._blood","fullName":"Sarcasm In Blood","url":"https://www.instagram.com/reel/DP1Hi2LiHpX/","displayUrl":"","timestamp":"2026-03-18T13:00:00.000Z","videoDuration":20,"type":"Reel"},{"id":"DKcalTzoftf","category":"Music","caption":"Behind the scenes of our new track together #martingarrix #lauv #music","likesCount":7800000,"viewsCount":632000000,"commentsCount":98000,"username":"martingarrix","fullName":"Martin Garrix","url":"https://www.instagram.com/reel/DKcalTzoftf/","displayUrl":"","timestamp":"2026-02-10T15:00:00.000Z","videoDuration":30,"type":"Reel"},{"id":"DQk6deIkjKZ","category":"Comedy","caption":"Funny barber moments - he wasn't expecting that #barber #comedy #funny","likesCount":6500000,"viewsCount":546000000,"commentsCount":85000,"username":"ladkahai99","fullName":"Ladka Hai","url":"https://www.instagram.com/reel/DQk6deIkjKZ/","displayUrl":"","timestamp":"2026-03-05T17:00:00.000Z","videoDuration":18,"type":"Reel"},{"id":"DLcDq1oIW3q","category":"AI Viral","caption":"AI made me jump off a yacht and it looks way too real #ai #fiske #viral","likesCount":5800000,"viewsCount":521000000,"commentsCount":72000,"username":"fiske.ai","fullName":"Fiske AI","url":"https://www.instagram.com/reel/DLcDq1oIW3q/","displayUrl":"","timestamp":"2026-02-22T12:00:00.000Z","videoDuration":14,"type":"Reel"},{"id":"DDP7RD-SOrZ","category":"Comedy","caption":"The chain stays ON #comedy #anwar #funny #chain","likesCount":5200000,"viewsCount":512000000,"commentsCount":68000,"username":"anwar","fullName":"Anwar Jibawi","url":"https://www.instagram.com/reel/DDP7RD-SOrZ/","displayUrl":"","timestamp":"2025-12-15T10:00:00.000Z","videoDuration":22,"type":"Reel"},{"id":"DKmtMrxxbCU","category":"Sports","caption":"Billiards trick shot that broke the internet #billiards #trickshot #comedy","likesCount":4900000,"viewsCount":507000000,"commentsCount":62000,"username":"thepointerbrothers","fullName":"The Pointer Brothers","url":"https://www.instagram.com/reel/DKmtMrxxbCU/","displayUrl":"","timestamp":"2026-02-18T14:00:00.000Z","videoDuration":16,"type":"Reel"},{"id":"C_nVHUlKB-9","category":"AI Viral","caption":"What if tennis was played by giant humans? CGI madness #cgi #ai #tennis","likesCount":4500000,"viewsCount":501000000,"commentsCount":55000,"username":"vertexcgi","fullName":"VertexCGI","url":"https://www.instagram.com/reel/C_nVHUlKB-9/","displayUrl":"","timestamp":"2025-09-20T11:00:00.000Z","videoDuration":19,"type":"Reel"}],
+
+  shorts: [{"id":"O89Y3pD71vI","videoId":"O89Y3pD71vI","category":"Comedy","title":"If we all had the same dream","description":"What if everyone had the exact same dream? #comedy #shorts","viewCount":2300000000,"likeCount":45000000,"commentCount":850000,"channelTitle":"ZeeKay","channelId":"","publishedAt":"2024-08-15T10:00:00Z","duration":"PT0M11S","url":"https://www.youtube.com/shorts/O89Y3pD71vI","isShort":true},{"id":"QvXAu2VTqM0","videoId":"QvXAu2VTqM0","category":"Magic","title":"Real life transforming Cinderella dress!","description":"Watch this incredible dress transformation magic trick #magic #cinderella","viewCount":1900000000,"likeCount":39000000,"commentCount":720000,"channelTitle":"Justin Flom","channelId":"","publishedAt":"2024-01-20T14:00:00Z","duration":"PT0M19S","url":"https://www.youtube.com/shorts/QvXAu2VTqM0","isShort":true},{"id":"dFzmJLWGmys","videoId":"dFzmJLWGmys","category":"Nature","title":"Mountain tribal kid knows how to make an amazing breakfast","description":"Beautiful nature life - watch this incredible mountain breakfast #nature #cooking","viewCount":1480000000,"likeCount":28000000,"commentCount":450000,"channelTitle":"Fruits & Nature","channelId":"","publishedAt":"2024-03-10T08:00:00Z","duration":"PT0M45S","url":"https://www.youtube.com/shorts/dFzmJLWGmys","isShort":true},{"id":"JfbnpYLe3Ms","videoId":"JfbnpYLe3Ms","category":"Comedy","title":"If Cleaning Was a Timed Sport. Part 2","description":"What if cleaning your house was a competitive sport? #comedy #cleaning #shorts","viewCount":1600000000,"likeCount":35000000,"commentCount":680000,"channelTitle":"Daniel LaBelle","channelId":"","publishedAt":"2023-05-12T16:00:00Z","duration":"PT0M37S","url":"https://www.youtube.com/shorts/JfbnpYLe3Ms","isShort":true},{"id":"Nus7MfF2ytw","videoId":"Nus7MfF2ytw","category":"Entertainment","title":"Power Tools Racing Is INTENSE!!","description":"We raced power tools and it got out of hand #howridiculous #race","viewCount":1500000000,"likeCount":31000000,"commentCount":520000,"channelTitle":"How Ridiculous","channelId":"","publishedAt":"2024-06-18T12:00:00Z","duration":"PT0M35S","url":"https://www.youtube.com/shorts/Nus7MfF2ytw","isShort":true},{"id":"se50viFJ0AQ","videoId":"se50viFJ0AQ","category":"Entertainment","title":"Would You Fly To Paris For A Baguette?","description":"I gave a stranger $300 to fly to Paris for a fresh baguette #mrbeast #paris","viewCount":1500000000,"likeCount":56000000,"commentCount":980000,"channelTitle":"MrBeast","channelId":"","publishedAt":"2024-11-02T15:00:00Z","duration":"PT0M43S","url":"https://www.youtube.com/shorts/se50viFJ0AQ","isShort":true},{"id":"R1Ehb3JA-cM","videoId":"R1Ehb3JA-cM","category":"Magic","title":"How Zach King Gets Away With Doing Graffiti","description":"Visual magic that will blow your mind #zachking #magic #illusion","viewCount":1230000000,"likeCount":26000000,"commentCount":380000,"channelTitle":"Zach King","channelId":"","publishedAt":"2023-09-22T11:00:00Z","duration":"PT0M29S","url":"https://www.youtube.com/shorts/R1Ehb3JA-cM","isShort":true},{"id":"Zhpk3ML7bIQ","videoId":"Zhpk3ML7bIQ","category":"Comedy","title":"Revenge","description":"The ultimate sibling revenge prank #twins #prank #revenge","viewCount":1160000000,"likeCount":24000000,"commentCount":350000,"channelTitle":"Lucas and Marcus","channelId":"","publishedAt":"2023-07-14T13:00:00Z","duration":"PT0M31S","url":"https://www.youtube.com/shorts/Zhpk3ML7bIQ","isShort":true}]
+};
+
+// ─── PLATFORM CONFIG ───
+const platformConfig = {
+  tiktok: {
+    title: 'Viral TikTok Scout',
+    subtitle: 'Browse trending videos — search your niche, preview inline, remake with AI',
+    searchLabel: 'Search TikTok',
+    linkLabel: 'TikTok',
+    sortOptions: [
+      { value: 'plays', label: 'Most Played' },
+      { value: 'likes', label: 'Most Liked' },
+      { value: 'shares', label: 'Most Shared' },
+      { value: 'recent', label: 'Most Recent' }
+    ],
+    defaultSort: 'plays'
+  },
+  reels: {
+    title: 'Viral <span class="ig-gradient">Reels</span> Scout',
+    subtitle: 'Browse trending Instagram Reels, find repeatable hooks, then build video directions',
+    searchLabel: 'Search Reels',
+    linkLabel: 'Instagram',
+    sortOptions: [
+      { value: 'likes', label: 'Most Liked' },
+      { value: 'views', label: 'Most Viewed' },
+      { value: 'comments', label: 'Most Commented' },
+      { value: 'shares', label: 'Most Shared' },
+      { value: 'recent', label: 'Most Recent' }
+    ],
+    defaultSort: 'likes'
+  },
+  shorts: {
+    title: '<span class="yt-icon"></span> Viral Shorts Scout',
+    subtitle: 'Find trending YouTube Shorts by niche — search, preview, star your favorites',
+    searchLabel: 'Search Shorts',
+    linkLabel: 'YouTube',
+    sortOptions: [
+      { value: 'views', label: 'Most Viewed' },
+      { value: 'likes', label: 'Most Liked' },
+      { value: 'comments', label: 'Most Comments' },
+      { value: 'recent', label: 'Most Recent' }
+    ],
+    defaultSort: 'views'
+  }
+};
+
+// ─── HELPERS ───
 function formatNum(n) {
+  if (n >= 1000000000) return (n/1000000000).toFixed(1).replace('.0','') + 'B';
   if (n >= 1000000) return (n/1000000).toFixed(1).replace('.0','') + 'M';
   if (n >= 1000) return (n/1000).toFixed(1).replace('.0','') + 'K';
   return n.toString();
@@ -306,19 +394,91 @@ function formatDuration(s) {
   return m + ':' + sec.toString().padStart(2,'0');
 }
 
-// Dynamic category colors
+function parseDuration(dur) {
+  if (!dur) return '';
+  if (/^\d+:\d{2}(:\d{2})?$/.test(dur)) return dur;
+  const m = dur.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+  if (!m) return dur;
+  const h = parseInt(m[1] || 0), min = parseInt(m[2] || 0), sec = parseInt(m[3] || 0);
+  if (h > 0) return h + ':' + min.toString().padStart(2,'0') + ':' + sec.toString().padStart(2,'0');
+  return min + ':' + sec.toString().padStart(2,'0');
+}
+
+function firstValue(...values) {
+  return values.find(value => value !== undefined && value !== null && value !== '');
+}
+
+function numberValue(...values) {
+  const value = firstValue(...values);
+  if (typeof value === 'number') return value;
+  if (typeof value === 'string') {
+    const parsed = Number(value.replace(/,/g, ''));
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+  return 0;
+}
+
+function textValue(value) {
+  if (!value) return '';
+  if (typeof value === 'string') return value;
+  if (typeof value === 'object') return value.text || value.caption || '';
+  return String(value);
+}
+
+function extractInstagramCode(item) {
+  const direct = firstValue(item.code, item.shortcode, item.shortCode);
+  if (direct) return String(direct);
+  const url = firstValue(item.url, item.reel_url, item.reelUrl, item.permalink);
+  const match = String(url || '').match(/instagram\.com\/(?:reel|p)\/([^/?#]+)/i);
+  return match?.[1] || '';
+}
+
+function instagramUrlFromItem(item) {
+  const url = firstValue(item.url, item.reel_url, item.reelUrl, item.permalink);
+  if (url) return String(url);
+  const code = extractInstagramCode(item);
+  return code ? `https://www.instagram.com/reel/${code}/` : '';
+}
+
+function instagramEmbedUrlFromItem(item) {
+  const code = extractInstagramCode(item);
+  return code ? `https://www.instagram.com/reel/${code}/embed/captioned/` : '';
+}
+
+function normalizeReelItem(item, category, index = 0) {
+  const code = extractInstagramCode(item);
+  const url = instagramUrlFromItem(item);
+  const id = String(firstValue(item.id, item.pk, code, `ig_${index}_${Math.random().toString(36).slice(2)}`));
+  const user = item.user || item.owner || item.author || {};
+  const caption = textValue(firstValue(item.caption, item.caption_text, item.captionText, item.description, item.text));
+  const takenAt = firstValue(item.taken_at, item.takenAt, item.timestamp, item.taken_at_timestamp);
+
+  return {
+    id,
+    category,
+    caption: caption.slice(0, 300),
+    likesCount: numberValue(item.like_count, item.likes_count, item.likesCount, item.likes),
+    viewsCount: numberValue(item.ig_play_count, item.play_count, item.views_count, item.viewsCount, item.video_view_count, item.plays),
+    commentsCount: numberValue(item.comment_count, item.comments_count, item.commentsCount, item.comments),
+    shareCount: numberValue(item.share_count, item.shares_count, item.shareCount, item.shares),
+    username: firstValue(user.username, item.username, item.ownerUsername, item.owner_username, ''),
+    fullName: firstValue(user.full_name, user.fullName, item.fullName, item.ownerFullName, ''),
+    url,
+    displayUrl: firstValue(item.thumbnail_url, item.thumbnailUrl, item.display_url, item.displayUrl, item.image_url, ''),
+    timestamp: typeof takenAt === 'number' ? new Date(takenAt * 1000).toISOString() : firstValue(takenAt, item.taken_at_date, item.date, new Date().toISOString()),
+    videoDuration: Math.round(numberValue(item.video_duration, item.videoDuration, item.duration)),
+    type: 'Reel'
+  };
+}
+
+// ─── DYNAMIC CATEGORY COLORS ───
 const catColors = {};
 const colorPool = [
-  { bg: '#1a1030', fg: '#a78bfa' },
-  { bg: '#102010', fg: '#86efac' },
-  { bg: '#101828', fg: '#7dd3fc' },
-  { bg: '#201818', fg: '#fca5a5' },
-  { bg: '#1a1a10', fg: '#fcd34d' },
-  { bg: '#101a1a', fg: '#67e8f9' },
-  { bg: '#1a100a', fg: '#fdba74' },
-  { bg: '#1a0a1a', fg: '#f0abfc' },
-  { bg: '#0a1a10', fg: '#6ee7b7' },
-  { bg: '#1a0a0a', fg: '#fda4af' },
+  { bg: '#1a1030', fg: '#a78bfa' }, { bg: '#102010', fg: '#86efac' },
+  { bg: '#101828', fg: '#7dd3fc' }, { bg: '#201818', fg: '#fca5a5' },
+  { bg: '#1a1a10', fg: '#fcd34d' }, { bg: '#101a1a', fg: '#67e8f9' },
+  { bg: '#1a100a', fg: '#fdba74' }, { bg: '#1a0a1a', fg: '#f0abfc' },
+  { bg: '#0a1a10', fg: '#6ee7b7' }, { bg: '#1a0a0a', fg: '#fda4af' },
 ];
 let colorIndex = 0;
 
@@ -335,27 +495,29 @@ function catClass(cat) {
   return 'cat-' + cat.toLowerCase().replace(/[^a-z0-9]/g, '-');
 }
 
-// Favorites -- saves to localStorage AND server-side stars.json
+// ─── FAVORITES (per-platform) ───
 let starredVideos = [];
 let starredIds = [];
 
+function starsKey() { return currentPlatform + '_stars'; }
+
 async function loadStars() {
   try {
-    const resp = await fetch('/api/stars');
+    const resp = await fetch('/api/stars/' + currentPlatform);
     if (resp.ok) {
       starredVideos = await resp.json();
       starredIds = starredVideos.map(v => v.id);
-      localStorage.setItem('ig_favorite_ids', JSON.stringify(starredIds));
-      localStorage.setItem('ig_favorite_videos', JSON.stringify(starredVideos));
+      localStorage.setItem(starsKey() + '_ids', JSON.stringify(starredIds));
+      localStorage.setItem(starsKey() + '_videos', JSON.stringify(starredVideos));
       return;
     }
   } catch {}
-  try { starredIds = JSON.parse(localStorage.getItem('ig_favorite_ids') || '[]'); } catch { starredIds = []; }
-  try { starredVideos = JSON.parse(localStorage.getItem('ig_favorite_videos') || '[]'); } catch { starredVideos = []; }
+  try { starredIds = JSON.parse(localStorage.getItem(starsKey() + '_ids') || '[]'); } catch { starredIds = []; }
+  try { starredVideos = JSON.parse(localStorage.getItem(starsKey() + '_videos') || '[]'); } catch { starredVideos = []; }
 }
 
-function getFavoriteVideos() { return starredVideos; }
 function isFavorite(id) { return starredIds.includes(id); }
+function getFavoriteVideos() { return starredVideos; }
 
 async function toggleFavorite(id, btn) {
   if (starredIds.includes(id)) {
@@ -368,26 +530,31 @@ async function toggleFavorite(id, btn) {
     if (video) starredVideos.push(video);
     btn.classList.add('starred');
   }
-  localStorage.setItem('ig_favorite_ids', JSON.stringify(starredIds));
-  localStorage.setItem('ig_favorite_videos', JSON.stringify(starredVideos));
-  try { fetch('/api/stars', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(starredVideos) }); } catch {}
+  localStorage.setItem(starsKey() + '_ids', JSON.stringify(starredIds));
+  localStorage.setItem(starsKey() + '_videos', JSON.stringify(starredVideos));
+  try { fetch('/api/stars/' + currentPlatform, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(starredVideos) }); } catch {}
 }
 
-// Home button
-function goHome() {
-  currentVideos = [...sampleReels];
-  document.getElementById('niche-input').value = '';
-  document.getElementById('subtitle').textContent = 'Browse trending Instagram Reels -- search your niche, preview thumbnails, star your favorites';
-  buildFilterButtons();
-  renderCards('all', document.getElementById('sort-select').value);
-}
-
-// Niche management
+// ─── NICHE MANAGEMENT ───
 const defaultNiches = ['Health & Fitness', 'Business', 'Cooking', 'Real Estate', 'Travel', 'Fashion', 'Tech', 'Comedy', 'Beauty', 'Motivation'];
+const pinnedCategories = {
+  reels: ['UGC', 'Product Promo', 'Ads', 'Reviews', 'Unboxing', 'Explainers', 'AI Creator'],
+};
+const categorySearchTerms = {
+  reels: {
+    UGC: 'ugc product ad reels',
+    'Product Promo': 'product promo ad reels',
+    Ads: 'high converting ad creative reels',
+    Reviews: 'product review reels',
+    Unboxing: 'unboxing product reels',
+    Explainers: 'explainer ad reels',
+    'AI Creator': 'ai creator product ad reels',
+  },
+};
 
 function getNiches() {
   try {
-    const saved = localStorage.getItem('ig_niches');
+    const saved = localStorage.getItem('scout_niches');
     return saved ? JSON.parse(saved) : defaultNiches;
   } catch { return defaultNiches; }
 }
@@ -396,37 +563,92 @@ function saveNiches() {
   const val = document.getElementById('niches-input').value.trim();
   if (val) {
     const niches = val.split(',').map(s => s.trim()).filter(Boolean);
-    localStorage.setItem('ig_niches', JSON.stringify(niches));
+    localStorage.setItem('scout_niches', JSON.stringify(niches));
     document.getElementById('niches-status').textContent = 'Saved!';
-    setTimeout(() => { document.getElementById('niches-status').textContent = ''; }, 2000);
+    setTimeout(() => document.getElementById('niches-status').textContent = '', 2000);
     buildFilterButtons();
   }
 }
 
-function saveResultsCount() {
-  const val = document.getElementById('results-count').value.trim();
-  if (val) {
-    localStorage.setItem('ig_results_count', val);
-    document.getElementById('results-status').textContent = 'Saved!';
-    setTimeout(() => { document.getElementById('results-status').textContent = ''; }, 2000);
-  }
-}
-
 function getResultsCount() {
-  return parseInt(localStorage.getItem('ig_results_count') || '20', 10);
+  return parseInt(localStorage.getItem('scout_results_count') || '20', 10);
 }
 
-function quickSearch(query) {
+function saveResultsCount() {
+  const val = document.getElementById('results-count').value;
+  localStorage.setItem('scout_results_count', val);
+  document.getElementById('results-status').textContent = 'Saved!';
+  setTimeout(() => document.getElementById('results-status').textContent = '', 2000);
+}
+
+function quickSearch(query, category = '') {
+  pendingSearchCategory = category;
   document.getElementById('niche-input').value = query;
   searchNiche();
 }
 
+// ─── SETTINGS ───
+function toggleSettings() { document.getElementById('settings-panel').classList.toggle('open'); }
+
+function saveToken() {
+  const token = document.getElementById('apify-token').value.trim();
+  if (token) {
+    localStorage.setItem('apify_token', token);
+    document.getElementById('token-status').textContent = 'Saved!';
+    setTimeout(() => document.getElementById('token-status').textContent = '', 2000);
+  }
+}
+
+// ─── PLATFORM SWITCHING ───
+function switchPlatform(platform) {
+  currentPlatform = platform;
+  document.body.className = 'platform-' + platform;
+  document.body.dataset.readyPlatform = '';
+  document.querySelectorAll('.platform-tab').forEach(t => t.classList.toggle('active', t.dataset.platform === platform));
+
+  const cfg = platformConfig[platform];
+  document.getElementById('page-title').innerHTML = cfg.title;
+  document.getElementById('subtitle').textContent = cfg.subtitle;
+  document.getElementById('search-btn').textContent = cfg.searchLabel;
+  document.getElementById('brief-btn').style.display = platform === 'reels' ? '' : 'none';
+
+  // Update sort options
+  const sortEl = document.getElementById('sort-select');
+  sortEl.innerHTML = cfg.sortOptions.map(o => `<option value="${o.value}">${o.label}</option>`).join('');
+
+  // Reset to sample data
+  currentVideos = [...(sampleData[platform] || [])];
+  document.getElementById('grid').innerHTML = '<div class="loading-spinner"><div class="spinner"></div><div class="loading-text">Loading saved videos...</div></div>';
+
+  // Rebuild UI
+  loadStars().then(() => {
+    buildFilterButtons();
+    renderCards('all', cfg.defaultSort);
+    setupLazyLoad();
+    document.body.dataset.readyPlatform = platform;
+  });
+
+  document.getElementById('niche-input').value = '';
+  localStorage.setItem('scout_last_platform', platform);
+}
+
+function goHome() {
+  const cfg = platformConfig[currentPlatform];
+  currentVideos = [...(sampleData[currentPlatform] || [])];
+  document.getElementById('niche-input').value = '';
+  document.getElementById('subtitle').textContent = cfg.subtitle;
+  buildFilterButtons();
+  renderCards('all', cfg.defaultSort);
+  setupLazyLoad();
+}
+
+// ─── FILTER BUTTONS ───
 function buildFilterButtons() {
   const row = document.getElementById('filters-row');
   const sortEl = document.getElementById('sort-select');
   row.innerHTML = '';
 
-  // Starred button
+  // Starred
   const favBtn = document.createElement('button');
   favBtn.className = 'filter-btn';
   favBtn.dataset.filter = 'favorites';
@@ -437,10 +659,11 @@ function buildFilterButtons() {
     row.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
     favBtn.classList.add('active');
     renderCards('favorites', document.getElementById('sort-select').value);
+    setupLazyLoad();
   });
   row.appendChild(favBtn);
 
-  // All button
+  // All
   const allBtn = document.createElement('button');
   allBtn.className = 'filter-btn active';
   allBtn.dataset.filter = 'all';
@@ -449,23 +672,34 @@ function buildFilterButtons() {
     row.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
     allBtn.classList.add('active');
     renderCards('all', document.getElementById('sort-select').value);
+    setupLazyLoad();
   });
   row.appendChild(allBtn);
 
-  // Category buttons from current data
-  const categories = [...new Set(currentVideos.map(v => v.category))].filter(Boolean);
-  categories.forEach(cat => {
-    const btn = document.createElement('button');
-    btn.className = 'filter-btn';
-    btn.textContent = cat;
-    btn.dataset.filter = cat;
-    btn.addEventListener('click', () => {
-      row.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      renderCards(cat, document.getElementById('sort-select').value);
+  // Category buttons from current data, plus platform-specific scouting categories.
+  const categories = [
+    ...(pinnedCategories[currentPlatform] || []),
+    ...currentVideos.map(v => v.category).filter(Boolean),
+  ].filter((cat, index, arr) => arr.indexOf(cat) === index);
+  if (categories.length > 1) {
+    categories.forEach(cat => {
+      const btn = document.createElement('button');
+      btn.className = 'filter-btn';
+      btn.textContent = cat;
+      btn.dataset.filter = cat;
+      btn.addEventListener('click', () => {
+        row.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        if (currentVideos.some(v => v.category === cat)) {
+          renderCards(cat, document.getElementById('sort-select').value);
+          setupLazyLoad();
+        } else {
+          quickSearch(categorySearchTerms[currentPlatform]?.[cat] || cat.toLowerCase(), cat);
+        }
+      });
+      row.appendChild(btn);
     });
-    row.appendChild(btn);
-  });
+  }
 
   // Divider
   const divider = document.createElement('span');
@@ -490,49 +724,118 @@ function buildFilterButtons() {
   document.getElementById('niches-input').value = getNiches().join(', ');
 }
 
+// ─── RENDER CARDS (platform-aware) ───
 function renderCards(filter, sort) {
   const grid = document.getElementById('grid');
   let filtered;
+
   if (filter === 'all') filtered = [...currentVideos];
   else if (filter === 'favorites') {
     filtered = getFavoriteVideos();
     if (filtered.length === 0) {
-      grid.innerHTML = '<div class="empty"><div class="empty-icon">&#9734;</div>No starred reels yet -- click the star on any reel to save it here</div>';
+      grid.innerHTML = '<div class="empty"><div class="empty-icon">&#9734;</div>No starred videos yet — click the star on any video to save it</div>';
       return;
     }
+  } else {
+    filtered = currentVideos.filter(v => v.category === filter);
   }
-  else filtered = currentVideos.filter(v => v.category === filter);
 
-  if (sort === 'likes') filtered.sort((a,b) => (b.likesCount||0) - (a.likesCount||0));
-  else if (sort === 'views') filtered.sort((a,b) => (b.viewsCount||0) - (a.viewsCount||0));
-  else if (sort === 'comments') filtered.sort((a,b) => (b.commentsCount||0) - (a.commentsCount||0));
-  else if (sort === 'recent') filtered.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+  // Platform-specific sorting
+  filtered = sortVideos(filtered, sort);
 
   if (filtered.length === 0) {
-    grid.innerHTML = '<div class="empty"><div class="empty-icon">&#128270;</div>No reels found for this filter</div>';
+    grid.innerHTML = '<div class="empty">No videos found</div>';
     return;
   }
 
-  grid.innerHTML = filtered.map((v, i) => {
-    const hasThumb = v.displayUrl && v.displayUrl.length > 10;
-    const escapedId = (v.id || '').replace(/'/g, "\\'");
-    const escapedUrl = (v.url || '').replace(/'/g, "\\'");
+  grid.innerHTML = filtered.map((v, i) => renderCard(v, i)).join('');
+}
 
-    return `
-    <div class="card" data-category="${v.category || ''}">
-      <div class="card-embed" id="embed-${v.id}">
-        ${hasThumb
-          ? `<img class="thumbnail" src="${v.displayUrl}" alt="Reel thumbnail" loading="${i < 6 ? 'eager' : 'lazy'}" onerror="this.style.display='none'" />
-             <div class="thumbnail-overlay">
-               <div class="play-icon">&#9654;</div>
-             </div>`
-          : `<div class="placeholder" onclick="window.open('${escapedUrl}', '_blank')">
+function sortVideos(arr, sort) {
+  const copy = [...arr];
+  if (currentPlatform === 'tiktok') {
+    if (sort === 'plays') copy.sort((a,b) => (b.playCount||0) - (a.playCount||0));
+    else if (sort === 'likes') copy.sort((a,b) => (b.diggCount||0) - (a.diggCount||0));
+    else if (sort === 'shares') copy.sort((a,b) => (b.shareCount||0) - (a.shareCount||0));
+    else if (sort === 'recent') copy.sort((a,b) => new Date(b.createTimeISO||0) - new Date(a.createTimeISO||0));
+  } else if (currentPlatform === 'reels') {
+    if (sort === 'likes') copy.sort((a,b) => (b.likesCount||0) - (a.likesCount||0));
+    else if (sort === 'views') copy.sort((a,b) => (b.viewsCount||0) - (a.viewsCount||0));
+    else if (sort === 'comments') copy.sort((a,b) => (b.commentsCount||0) - (a.commentsCount||0));
+    else if (sort === 'shares') copy.sort((a,b) => (b.shareCount||0) - (a.shareCount||0));
+    else if (sort === 'recent') copy.sort((a,b) => new Date(b.timestamp||0) - new Date(a.timestamp||0));
+  } else if (currentPlatform === 'shorts') {
+    if (sort === 'views') copy.sort((a,b) => (b.viewCount||0) - (a.viewCount||0));
+    else if (sort === 'likes') copy.sort((a,b) => (b.likeCount||0) - (a.likeCount||0));
+    else if (sort === 'comments') copy.sort((a,b) => (b.commentCount||0) - (a.commentCount||0));
+    else if (sort === 'recent') copy.sort((a,b) => new Date(b.publishedAt||0) - new Date(a.publishedAt||0));
+  }
+  return copy;
+}
+
+function renderCard(v, i) {
+  const escapedId = (v.id || '').replace(/'/g, "\\'");
+  const cfg = platformConfig[currentPlatform];
+
+  if (currentPlatform === 'tiktok') return renderTikTokCard(v, i, escapedId);
+  if (currentPlatform === 'reels') return renderReelsCard(v, i, escapedId);
+  if (currentPlatform === 'shorts') return renderShortsCard(v, i, escapedId);
+}
+
+function renderTikTokCard(v, i, escapedId) {
+  return `
+    <div class="card" data-category="${v.category}">
+      <div class="card-embed" id="embed-${v.id}" data-video-id="${v.id}">
+        ${i < 6
+          ? `<iframe src="https://www.tiktok.com/player/v1/${v.id}?hide_share=1&hide_like=1&hide_comment=1&hide_music=1" allowfullscreen allow="encrypted-media" loading="${i < 3 ? 'eager' : 'lazy'}"></iframe>`
+          : `<div class="placeholder" onclick="loadTikTokEmbed('${v.id}')">
               <div class="play-icon">&#9654;</div>
-              <div class="placeholder-text">Click to view on Instagram</div>
+              <div class="placeholder-text">Scroll to load</div>
+            </div>`
+        }
+        ${v.duration ? `<div class="duration-badge">${formatDuration(v.duration)}</div>` : ''}
+        <button class="star-btn ${isFavorite(v.id) ? 'starred' : ''}" onclick="event.stopPropagation(); toggleFavorite('${escapedId}', this)">&#9733;</button>
+      </div>
+      <div class="card-body">
+        <div class="card-meta">
+          <span class="card-category ${catClass(v.category)}">${v.category}</span>
+          <span class="card-author">@${v.author}</span>
+        </div>
+        <div class="card-text">${v.text || 'No description'}</div>
+        <div class="card-stats">
+          <div class="stat"><span class="stat-value">${formatNum(v.playCount||0)}</span><span class="stat-label">Plays</span></div>
+          <div class="stat"><span class="stat-value">${formatNum(v.diggCount||0)}</span><span class="stat-label">Likes</span></div>
+          <div class="stat"><span class="stat-value">${formatNum(v.shareCount||0)}</span><span class="stat-label">Shares</span></div>
+        </div>
+        <div class="card-actions">
+          <button class="btn btn-copy" onclick="copyUrl('${v.url}', this)">Copy URL</button>
+          <a class="btn btn-open" href="${v.url}" target="_blank" rel="noopener">TikTok</a>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderReelsCard(v, i, escapedId) {
+  const hasThumb = v.displayUrl && v.displayUrl.length > 10;
+  const escapedUrl = (v.url || '').replace(/'/g, "\\'");
+  const embedUrl = instagramEmbedUrlFromItem(v);
+  const escapedEmbedUrl = embedUrl.replace(/'/g, "\\'");
+  const shouldPreload = i < 6 && embedUrl;
+  return `
+    <div class="card" data-category="${v.category || ''}">
+      <div class="card-embed" id="embed-${v.id}" data-reel-embed="${escapedEmbedUrl}">
+        ${shouldPreload
+          ? `<iframe src="${embedUrl}" allowfullscreen allow="clipboard-write; encrypted-media; picture-in-picture" loading="${i < 3 ? 'eager' : 'lazy'}"></iframe>`
+          : hasThumb
+          ? `<img class="thumbnail" src="${v.displayUrl}" alt="Reel thumbnail" loading="${i < 6 ? 'eager' : 'lazy'}" onerror="this.style.display='none'" />
+             <div class="thumbnail-overlay" onclick="loadReelsEmbed('${escapedId}')"><div class="play-icon">&#9654;</div></div>`
+          : `<div class="placeholder" onclick="loadReelsEmbed('${escapedId}')">
+              <div class="play-icon">&#9654;</div>
+              <div class="placeholder-text">${embedUrl ? 'Scroll to load Reel' : 'Open on Instagram'}</div>
             </div>`
         }
         ${v.videoDuration ? `<div class="duration-badge">${formatDuration(v.videoDuration)}</div>` : ''}
-        <span class="reel-type-badge">${v.type || 'Reel'}</span>
+        <span class="platform-badge" style="background:rgba(225,48,108,0.85);">${v.type || 'Reel'}</span>
         <button class="star-btn ${isFavorite(v.id) ? 'starred' : ''}" onclick="event.stopPropagation(); toggleFavorite('${escapedId}', this)">&#9733;</button>
       </div>
       <div class="card-body">
@@ -542,17 +845,92 @@ function renderCards(filter, sort) {
         </div>
         <div class="card-text">${v.caption || 'No caption'}</div>
         <div class="card-stats">
-          <div class="stat"><span class="stat-value">${formatNum(v.viewsCount || 0)}</span><span class="stat-label">Views</span></div>
-          <div class="stat"><span class="stat-value">${formatNum(v.likesCount || 0)}</span><span class="stat-label">Likes</span></div>
-          <div class="stat"><span class="stat-value">${formatNum(v.commentsCount || 0)}</span><span class="stat-label">Comments</span></div>
+          <div class="stat"><span class="stat-value">${formatNum(v.viewsCount||0)}</span><span class="stat-label">Views</span></div>
+          <div class="stat"><span class="stat-value">${formatNum(v.likesCount||0)}</span><span class="stat-label">Likes</span></div>
+          <div class="stat"><span class="stat-value">${formatNum(v.commentsCount||0)}</span><span class="stat-label">Comments</span></div>
+          ${v.shareCount ? `<div class="stat"><span class="stat-value">${formatNum(v.shareCount)}</span><span class="stat-label">Shares</span></div>` : ''}
         </div>
         <div class="card-actions">
           <button class="btn btn-copy" onclick="copyUrl('${escapedUrl}', this)">Copy URL</button>
+          <button class="btn btn-pollo" onclick="copyUrlToPollo('${escapedUrl}', this)">Pollo</button>
           <a class="btn btn-open" href="${v.url}" target="_blank" rel="noopener">Instagram</a>
         </div>
       </div>
     </div>`;
-  }).join('');
+}
+
+function renderShortsCard(v, i, escapedId) {
+  const videoId = v.videoId || v.id;
+  const shortsUrl = `https://www.youtube.com/shorts/${videoId}`;
+  const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0&modestbranding=1`;
+  return `
+    <div class="card" data-category="${v.category || ''}">
+      <div class="card-embed" id="embed-${videoId}" data-video-id="${videoId}">
+        ${i < 6
+          ? `<iframe src="${embedUrl}" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" loading="${i < 3 ? 'eager' : 'lazy'}"></iframe>`
+          : `<div class="placeholder" onclick="loadShortsEmbed('${videoId}')">
+              <div class="play-icon">&#9654;</div>
+              <div class="placeholder-text">Click to load</div>
+            </div>`
+        }
+        ${v.duration ? `<div class="duration-badge">${parseDuration(v.duration)}</div>` : ''}
+        <div class="views-badge">${formatNum(v.viewCount||0)}</div>
+        <button class="star-btn ${isFavorite(v.id) ? 'starred' : ''}" onclick="event.stopPropagation(); toggleFavorite('${escapedId}', this)">&#9733;</button>
+      </div>
+      <div class="card-body">
+        <div class="card-meta">
+          ${v.category ? `<span class="card-category ${catClass(v.category)}">${v.category}</span>` : ''}
+          <span class="card-author">${v.channelTitle || ''}</span>
+        </div>
+        <div class="card-text">${v.title || v.description || 'No description'}</div>
+        <div class="card-stats">
+          <div class="stat"><span class="stat-value">${formatNum(v.viewCount||0)}</span><span class="stat-label">Views</span></div>
+          <div class="stat"><span class="stat-value">${formatNum(v.likeCount||0)}</span><span class="stat-label">Likes</span></div>
+          <div class="stat"><span class="stat-value">${formatNum(v.commentCount||0)}</span><span class="stat-label">Comments</span></div>
+        </div>
+        <div class="card-actions">
+          <button class="btn btn-copy" onclick="copyUrl('${shortsUrl}', this)">Copy URL</button>
+          <a class="btn btn-open" href="${shortsUrl}" target="_blank" rel="noopener">YouTube</a>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ─── EMBED LOADERS ───
+function loadTikTokEmbed(videoId) {
+  const container = document.getElementById('embed-' + videoId);
+  container.innerHTML = `<iframe src="https://www.tiktok.com/player/v1/${videoId}?autoplay=1&hide_share=1&hide_like=1&hide_comment=1&hide_music=1" allowfullscreen allow="autoplay; encrypted-media"></iframe>`;
+}
+
+function loadShortsEmbed(videoId) {
+  const container = document.getElementById('embed-' + videoId);
+  const placeholder = container.querySelector('.placeholder');
+  if (placeholder) {
+    const iframe = document.createElement('iframe');
+    iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1`;
+    iframe.allowFullscreen = true;
+    iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+    placeholder.replaceWith(iframe);
+  }
+}
+
+function loadReelsEmbed(id) {
+  const container = document.getElementById('embed-' + id);
+  if (!container || container.querySelector('iframe')) return;
+  const embedUrl = container.dataset.reelEmbed;
+  if (!embedUrl) {
+    const reel = currentVideos.find(v => v.id === id) || starredVideos.find(v => v.id === id);
+    if (reel?.url) window.open(reel.url, '_blank', 'noopener');
+    return;
+  }
+
+  const iframe = document.createElement('iframe');
+  iframe.src = embedUrl;
+  iframe.allowFullscreen = true;
+  iframe.allow = 'clipboard-write; encrypted-media; picture-in-picture';
+  iframe.loading = 'lazy';
+  container.querySelectorAll('.placeholder, .thumbnail, .thumbnail-overlay').forEach(el => el.remove());
+  container.prepend(iframe);
 }
 
 function copyUrl(url, btn) {
@@ -563,49 +941,122 @@ function copyUrl(url, btn) {
   });
 }
 
-// Sort change
+function copyUrlToPollo(url, btn) {
+  navigator.clipboard.writeText(url).then(() => {
+    btn.textContent = 'Copied URL';
+    window.open('https://pollo.ai/app/ai-agent', '_blank', 'noopener');
+    setTimeout(() => { btn.textContent = 'Pollo'; }, 2400);
+  });
+}
+
+function reelPromptBlock(reel, index) {
+  return [
+    `Reference ${index + 1}: ${reel.url}`,
+    `Creator: @${reel.username || reel.author || 'unknown'}`,
+    `Caption: ${reel.caption || reel.text || 'No caption'}`,
+    `Metrics: ${formatNum(reel.viewsCount || reel.playCount || 0)} views, ${formatNum(reel.likesCount || reel.diggCount || 0)} likes, ${formatNum(reel.commentsCount || reel.commentCount || 0)} comments`,
+    reel.shareCount ? `Shares: ${formatNum(reel.shareCount)}` : '',
+  ].filter(Boolean).join('\n');
+}
+
+function buildPolloCampaignPrompt(reels) {
+  const scenario = scenarioConfig[activeScenario] || scenarioConfig.ugc;
+  const references = reels.map(reelPromptBlock).join('\n\n');
+  const outputs = scenario.outputs.map((item, index) => `${index + 1}. ${item}`).join('\n');
+
+  return [
+    'Pollo AI / Seedance 2.0 Ultra campaign sprint',
+    '',
+    `Campaign mode: ${scenario.label}`,
+    '',
+    'Use these Instagram Reels as trend research only. Extract repeatable hooks, visual patterns, scene structure, pacing, product angles, and why each format works.',
+    '',
+    references,
+    '',
+    'Create original Seedance 2.0 video directions for a product or agency-style campaign:',
+    outputs,
+    '',
+    'For each direction, include:',
+    '- A concise video prompt for Seedance 2.0',
+    '- Opening hook',
+    '- Shot sequence',
+    '- Product placement moment',
+    '- Caption/on-screen text idea',
+    '- What to iterate if the first generation is weak',
+    '',
+    'Use the Ultra plan mindset: generate enough variations to compare, discard weak outputs, and keep the strongest creative direction.',
+    'Do not copy protected branding, faces, music, creator identity, or exact shot sequence.',
+  ].join('\n');
+}
+
+function copyPromptText(prompt, btn, resetLabel) {
+  navigator.clipboard.writeText(prompt).then(() => {
+    btn.textContent = 'Prompt copied';
+    window.open('https://pollo.ai/app/ai-agent', '_blank', 'noopener');
+    setTimeout(() => { btn.textContent = resetLabel; }, 2400);
+  });
+}
+
+function copyPolloPrompt(id, btn) {
+  const reel = currentVideos.find(v => v.id === id) || starredVideos.find(v => v.id === id);
+  if (!reel) return;
+  copyPromptText(buildPolloCampaignPrompt([reel]), btn, 'Video brief');
+}
+
+function copyStarredPolloPrompt(btn) {
+  const reels = starredVideos.length > 0 ? starredVideos.slice(0, 5) : currentVideos.slice(0, 5);
+  if (reels.length === 0) return;
+  copyPromptText(buildPolloCampaignPrompt(reels), btn, 'Copy video brief');
+}
+
+// ─── SORT CHANGE ───
 document.getElementById('sort-select').addEventListener('change', (e) => {
   const activeFilter = document.querySelector('.filter-btn.active')?.dataset?.filter || 'all';
   renderCards(activeFilter, e.target.value);
+  setupLazyLoad();
 });
 
-// Settings panel
-function toggleSettings() {
-  document.getElementById('settings-panel').classList.toggle('open');
+// ─── LAZY LOAD ───
+function setupLazyLoad() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const container = entry.target;
+        const videoId = container.dataset.videoId;
+        if (!container.querySelector('iframe')) {
+          if (currentPlatform === 'tiktok') {
+            if (container.querySelector('.placeholder')) {
+              container.innerHTML = `<iframe src="https://www.tiktok.com/player/v1/${videoId}?hide_share=1&hide_like=1&hide_comment=1&hide_music=1" allowfullscreen allow="encrypted-media"></iframe>`;
+            }
+          } else if (currentPlatform === 'reels') {
+            loadReelsEmbed(container.id.replace(/^embed-/, ''));
+          } else if (currentPlatform === 'shorts') {
+            if (!container.querySelector('.placeholder')) return;
+            const iframe = document.createElement('iframe');
+            iframe.src = `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`;
+            iframe.allowFullscreen = true;
+            iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+            container.querySelector('.placeholder').replaceWith(iframe);
+          }
+        }
+        observer.unobserve(container);
+      }
+    });
+  }, { rootMargin: '200px' });
+
+  document.querySelectorAll('.card-embed').forEach(el => {
+    const canLazyLoad = (el.dataset.videoId && el.querySelector('.placeholder')) || (el.dataset.reelEmbed && !el.querySelector('iframe'));
+    if (canLazyLoad) observer.observe(el);
+  });
 }
 
-function saveToken() {
-  const token = document.getElementById('apify-token').value.trim();
-  if (token) {
-    localStorage.setItem('apify_token', token);
-    document.getElementById('token-status').textContent = 'Saved!';
-    setTimeout(() => { document.getElementById('token-status').textContent = ''; }, 2000);
-  }
-}
-
-// Load saved token on start
-(function() {
-  const saved = localStorage.getItem('apify_token');
-  if (saved) {
-    document.getElementById('apify-token').value = saved;
-    document.getElementById('token-status').textContent = 'API ready';
-    document.getElementById('token-status').style.color = '#22c55e';
-  }
-  const savedCount = localStorage.getItem('ig_results_count');
-  if (savedCount) document.getElementById('results-count').value = savedCount;
-  const savedNiches = localStorage.getItem('ig_niches');
-  if (savedNiches) {
-    try { document.getElementById('niches-input').value = JSON.parse(savedNiches).join(', '); } catch {}
-  }
-})();
-
-// Search niche via Apify Instagram Search Reels
+// ─── SEARCH (platform-aware) ───
 async function searchNiche() {
   const query = document.getElementById('niche-input').value.trim();
   if (!query) return;
 
   const token = localStorage.getItem('apify_token');
-  if (!token) {
+  if (!token && currentPlatform !== 'reels') {
     toggleSettings();
     document.getElementById('token-status').textContent = 'Enter your Apify token first';
     document.getElementById('token-status').style.color = '#ef4444';
@@ -616,99 +1067,216 @@ async function searchNiche() {
   const btn = document.getElementById('search-btn');
   const loadingBar = document.getElementById('loading-bar');
   btn.disabled = true;
-  btn.textContent = 'Searching...';
   loadingBar.classList.add('active');
-  document.getElementById('subtitle').textContent = `Searching Instagram for "${query}"...`;
+
+  const cfg = platformConfig[currentPlatform];
+  btn.textContent = 'Searching...';
+  document.getElementById('subtitle').textContent = `Searching for "${query}"...`;
+
+  const grid = document.getElementById('grid');
+  grid.innerHTML = `<div class="loading-spinner"><div class="spinner"></div><div class="loading-text">Searching for "${query}"...</div></div>`;
 
   const resultsLimit = getResultsCount();
-  const maxPages = Math.max(1, Math.ceil(resultsLimit / 12));
+  const categoryLabel = pendingSearchCategory || query.charAt(0).toUpperCase() + query.slice(1);
+  pendingSearchCategory = '';
 
   try {
-    // Use patient_discovery~instagram-search-reels for keyword search
-    const runResp = await fetch(
-      `https://api.apify.com/v2/acts/patient_discovery~instagram-search-reels/runs?token=${token}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          query: query,
-          maxPages: maxPages
-        })
-      }
-    );
-
-    if (!runResp.ok) {
-      const errBody = await runResp.json().catch(() => ({}));
-      throw new Error(errBody.error?.message || 'Failed to start scraper. Check your Apify token and try again.');
-    }
-    const runData = await runResp.json();
-
-    const datasetId = runData.data?.defaultDatasetId;
-    if (!datasetId) throw new Error('No dataset returned from Apify');
-
-    // Poll for results
-    btn.textContent = 'Searching Instagram...';
     let items = [];
-    for (let attempt = 0; attempt < 30; attempt++) {
-      await new Promise(r => setTimeout(r, 3000));
-      const itemsResp = await fetch(
-        `https://api.apify.com/v2/datasets/${datasetId}/items?token=${token}&limit=${resultsLimit}&format=json`
-      );
-      items = await itemsResp.json();
-      if (items.length > 0) break;
-      btn.textContent = `Searching Instagram... (${(attempt+1)*3}s)`;
+
+    if (currentPlatform === 'tiktok') {
+      items = await searchTikTok(query, token, resultsLimit, btn, categoryLabel);
+    } else if (currentPlatform === 'reels') {
+      items = await searchReels(query, token, resultsLimit, btn, categoryLabel);
+    } else if (currentPlatform === 'shorts') {
+      items = await searchShorts(query, token, resultsLimit, btn, categoryLabel);
     }
 
-    if (items.length === 0) throw new Error('No reels found for this search. Try a different keyword.');
+    if (items.length === 0) throw new Error('No results found. Try a different keyword.');
 
-    // Transform to our format
-    const niceName = query.charAt(0).toUpperCase() + query.slice(1);
-    const newReels = items.map(item => {
-      const id = String(item.id || 'ig_' + Math.random().toString(36).slice(2));
-      const code = item.code || '';
-      const caption = item.caption || '';
-      const likes = item.like_count || 0;
-      const views = item.play_count || 0;
-      const comments = item.comment_count || 0;
-      const username = item.user?.username || '';
-      const url = code ? `https://www.instagram.com/reel/${code}/` : '';
-      const displayUrl = item.thumbnail_url || '';
-      const timestamp = item.taken_at ? new Date(item.taken_at * 1000).toISOString() : new Date().toISOString();
-      const duration = item.video_duration || 0;
-
-      return {
-        id, category: niceName, caption, likesCount: likes,
-        viewsCount: views, commentsCount: comments,
-        username, fullName: username, url, displayUrl, timestamp,
-        videoDuration: Math.round(duration), type: 'Reel'
-      };
-    }).filter(v => v.id && v.url);
-
-    currentVideos = newReels;
+    currentVideos = items;
     buildFilterButtons();
     renderCards('all', document.getElementById('sort-select').value);
-    document.getElementById('subtitle').textContent = `${newReels.length} reels found for "${query}"`;
+    setupLazyLoad();
+    document.getElementById('subtitle').textContent = `${items.length} results found for "${query}"`;
 
   } catch (err) {
     document.getElementById('subtitle').textContent = `Error: ${err.message}`;
+    grid.innerHTML = `<div class="empty">Search failed: ${err.message}</div>`;
   } finally {
     btn.disabled = false;
-    btn.textContent = 'Search Reels';
+    btn.textContent = cfg.searchLabel;
     loadingBar.classList.remove('active');
   }
 }
 
-// Enter key triggers search
+function apifyHeaders(token) {
+  return {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${token}`
+  };
+}
+
+async function pollDataset(token, datasetId, limit, btn, platformLabel, maxAttempts = 30) {
+  let items = [];
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    await new Promise(r => setTimeout(r, 3000));
+    const resp = await fetch(`https://api.apify.com/v2/datasets/${datasetId}/items?limit=${limit}&format=json`, {
+      headers: apifyHeaders(token)
+    });
+    items = await resp.json();
+    if (items.length > 0) break;
+    btn.textContent = `Searching ${platformLabel}... (${(attempt+1)*3}s)`;
+    const lt = document.querySelector('.loading-text');
+    if (lt) lt.textContent = btn.textContent;
+  }
+  return items;
+}
+
+async function searchTikTok(query, token, limit, btn, categoryLabel) {
+  const runResp = await fetch(`https://api.apify.com/v2/acts/clockworks~tiktok-scraper/runs`, {
+    method: 'POST', headers: apifyHeaders(token),
+    body: JSON.stringify({ searchQueries: [query], resultsPerPage: limit, shouldDownloadCovers: false, shouldDownloadSlideshowImages: false, shouldDownloadSubtitles: false, shouldDownloadVideos: false })
+  });
+  const runData = await runResp.json();
+  const datasetId = runData.data?.defaultDatasetId;
+  if (!datasetId) throw new Error('No dataset returned');
+
+  const items = await pollDataset(token, datasetId, limit, btn, 'TikTok');
+  const niceName = categoryLabel || query.charAt(0).toUpperCase() + query.slice(1);
+  return items.map(item => ({
+    id: item.id || '', category: niceName,
+    text: (item.text || '').slice(0, 200),
+    playCount: item.playCount || 0, diggCount: item.diggCount || 0,
+    shareCount: item.shareCount || 0, commentCount: item.commentCount || 0,
+    url: item.webVideoUrl || '', author: item.authorMeta?.name || '',
+    authorNickname: item.authorMeta?.nickName || '', coverUrl: '',
+    createTimeISO: item.createTimeISO || '', duration: item.videoMeta?.duration || 0,
+  })).filter(v => v.id && v.url);
+}
+
+async function searchReels(query, token, limit, btn, categoryLabel) {
+  btn.textContent = 'Searching Instagram...';
+  const loadingText = document.querySelector('.loading-text');
+  if (loadingText) loadingText.textContent = 'Searching Instagram Reels... this can take 15-30s';
+  try {
+    const response = await fetch('/api/reels/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query, limit })
+    });
+    const data = await response.json().catch(() => ({}));
+    if (response.ok) {
+      const niceName = categoryLabel || query.charAt(0).toUpperCase() + query.slice(1);
+      return (data.items || [])
+        .map((item, index) => normalizeReelItem(item, niceName, index))
+        .filter(v => v.id && v.url);
+    }
+    if (!token) throw new Error(data.error || 'Server Reels search failed. Add APIFY_TOKEN on the server or save a local token in settings.');
+  } catch (error) {
+    if (!token) throw error;
+    btn.textContent = 'Server unavailable, trying local token...';
+  }
+
+  const maxPages = Math.max(1, Math.ceil(limit / 12));
+  const actors = [
+    {
+      id: 'data-slayer~instagram-search-reels',
+      input: { query }
+    },
+    {
+      id: 'patient_discovery~instagram-search-reels',
+      input: { query, maxPages }
+    }
+  ];
+
+  let datasetId = '';
+  let lastError = '';
+
+  for (const actor of actors) {
+    btn.textContent = `Starting Instagram actor...`;
+    const runResp = await fetch(`https://api.apify.com/v2/acts/${actor.id}/runs`, {
+      method: 'POST',
+      headers: apifyHeaders(token),
+      body: JSON.stringify(actor.input)
+    });
+
+    if (!runResp.ok) {
+      const errBody = await runResp.json().catch(() => ({}));
+      lastError = errBody.error?.message || `Failed to start ${actor.id}`;
+      continue;
+    }
+
+    const runData = await runResp.json();
+    datasetId = runData.data?.defaultDatasetId || '';
+    if (datasetId) {
+      const items = await pollDataset(token, datasetId, limit, btn, 'Instagram');
+      if (items.length > 0) {
+        const niceName = categoryLabel || query.charAt(0).toUpperCase() + query.slice(1);
+        return items
+          .map((item, index) => normalizeReelItem(item, niceName, index))
+          .filter(v => v.id && v.url);
+      }
+      lastError = `${actor.id} returned no Reels`;
+      continue;
+    }
+    lastError = `No dataset returned from ${actor.id}`;
+  }
+
+  if (!datasetId) throw new Error(lastError || 'No Instagram dataset returned');
+  throw new Error(lastError || 'No Instagram Reels returned');
+}
+
+async function searchShorts(query, token, limit, btn, categoryLabel) {
+  const runResp = await fetch(`https://api.apify.com/v2/acts/powerai~youtube-search-scraper/runs`, {
+    method: 'POST', headers: apifyHeaders(token),
+    body: JSON.stringify({ query, resultType: 'shorts', maxResults: Math.max(15, limit) })
+  });
+  if (!runResp.ok) {
+    const errBody = await runResp.json().catch(() => ({}));
+    throw new Error(errBody.error?.message || 'Failed to start scraper.');
+  }
+  const runData = await runResp.json();
+  const datasetId = runData.data?.defaultDatasetId;
+  if (!datasetId) throw new Error('No dataset returned');
+
+  const items = await pollDataset(token, datasetId, limit * 2, btn, 'YouTube');
+  const shortsOnly = items.filter(item => item.type === 'shorts');
+  if (shortsOnly.length === 0) throw new Error('No Shorts found.');
+
+  const niceName = categoryLabel || query.charAt(0).toUpperCase() + query.slice(1);
+  return shortsOnly.map(item => {
+    const videoId = item.videoId || '';
+    return {
+      id: videoId, videoId,
+      category: niceName, title: (item.title || '').slice(0, 200),
+      description: (item.description || '').slice(0, 300),
+      viewCount: parseInt(item.viewCount) || 0, likeCount: 0, commentCount: 0,
+      channelTitle: item.channelTitle || '', channelId: item.channelId || '',
+      publishedAt: item.publishedAt || item.publishDate || '',
+      duration: item.lengthText || '',
+      url: `https://www.youtube.com/shorts/${videoId}`, isShort: true
+    };
+  }).filter(v => v.id);
+}
+
+// ─── ENTER KEY ───
 document.getElementById('niche-input').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') searchNiche();
 });
 
-// Initial render with sample data
-let currentVideos = [...sampleReels];
-(async () => {
-  await loadStars();
-  buildFilterButtons();
-  renderCards('all', document.getElementById('sort-select').value);
+// ─── INIT ───
+(function() {
+  // Load saved token
+  const savedToken = localStorage.getItem('apify_token');
+  if (savedToken) {
+    document.getElementById('apify-token').value = savedToken;
+    document.getElementById('token-status').textContent = 'API ready';
+    document.getElementById('token-status').style.color = '#22c55e';
+  }
+  const savedCount = localStorage.getItem('scout_results_count');
+  if (savedCount) document.getElementById('results-count').value = savedCount;
+
+  switchPlatform(DEFAULT_PLATFORM);
 })();
 </script>
 

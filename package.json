@@ -1,0 +1,20 @@
+{
+  "name": "viral-reels-scout",
+  "version": "1.0.0",
+  "description": "Local dashboard for scouting viral TikTok, Reels, and Shorts ideas.",
+  "main": "server.js",
+  "scripts": {
+    "test": "npm run verify:reels && npm run verify:reels:server -- --source-only",
+    "start": "node server.js",
+    "test:visual": "node test-visual.mjs",
+    "verify:reels": "node verify-apify-reels.mjs",
+    "verify:reels:server": "node verify-reels-server.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "playwright": "^1.59.1"
+  }
+}
