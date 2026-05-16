@@ -23,7 +23,7 @@ Use these as inspiration only. Do not copy creator identity, exact captions, fac
 | --- | --- | --- |
 | UGC hooks | One product, multiple hooks. Good for explaining creative-volume testing. | https://www.instagram.com/reel/DXonhpEjnTj/ |
 | UGC beauty ad | Clean product-in-use format with strong share signal. | https://www.instagram.com/reel/DWHfqwAjDEk/ |
-| Product promo | Ecommerce ad angle: faster creative testing versus traditional production. | https://www.instagram.com/reel/DV9lbFfgXAD/ |
+| Product promo | AI-crafted product-commercial style without needing a studio shoot. | https://www.instagram.com/reel/DXXvI0uiAM-/ |
 | AI creator ad | Floating product / AI commercial format with strong viral metrics. | https://www.instagram.com/reel/DVp0cMXEbkV/ |
 | AI product commercial | Generated product-commercial style, useful for the final-output montage. | https://www.instagram.com/reel/DWfDd6fCBVz/ |
 | Review style | Faceless product-review lane, useful if you want a review example. | https://www.instagram.com/reel/DVD0k3_iLee/ |
@@ -39,6 +39,8 @@ Why this works:
 - UGC and beauty/skincare Reels are easy to understand visually.
 - The product supports close-ups, texture shots, unboxing, review, routine, and outdoor payoff scenes.
 - It avoids copying any real sponsor or competitor brand.
+
+Avoid making a Reel that advertises another AI ad platform your main on-screen reference. Those can help you think through the structure, but the cleanest sponsor-safe examples are UGC product shots, generic product promos, and AI-native product commercials.
 
 ## Prompts To Try In Pollo / Seedance
 
@@ -73,4 +75,3 @@ Create a 9:16 direct-response ad for Solara SPF 50. Hook with the problem: messy
 ## Suggested Script Beat
 
 "The mistake with AI video is going straight to prompting. I want to start with the pattern first. So I built this Reels scout with Codex, searched UGC and AI product ads, and found formats that already work: multi-hook product videos, beauty UGC, floating AI product ads, review clips. Now I can take the pattern into Pollo and use Seedance to generate original variants instead of guessing."
-
