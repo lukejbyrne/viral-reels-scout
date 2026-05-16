@@ -2,7 +2,7 @@
 
 Local dashboard for scouting viral TikTok, Instagram Reels, and YouTube Shorts ideas.
 
-For the Pollo / Seedance sponsor workflow, start with the Reels tab and use the focused categories: `UGC`, `Product Promo`, `Ads`, `Reviews`, `Unboxing`, `Explainers`, and `AI Creator`. See [`VIDEO_IDEAS.md`](VIDEO_IDEAS.md) for tested reference links and prompt starters.
+For the Pollo / Seedance sponsor workflow, start with the Reels tab and click `Demo Picks` to show the prepared references inside the app. The broader search categories are `UGC`, `Product Promo`, `Ads`, `Reviews`, `Unboxing`, `Explainers`, and `AI Creator`. See [`VIDEO_IDEAS.md`](VIDEO_IDEAS.md) for tested reference links and prompt starters.
 
 ## Run locally
 
