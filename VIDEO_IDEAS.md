@@ -9,14 +9,14 @@ Use the scout to find proven short-form ad patterns, then use Pollo / Seedance t
 Recommended on-camera path:
 
 1. Open Reels Scout.
-2. Click `Demo Picks`.
+2. Click `Big 10`.
 3. Pick one of the prepared references: `UGC Hooks`, `UGC Ad`, `Product Promo`, `AI Creator`, `AI Product Ad`, or `Review`.
 4. Star 2-3 references if you want to build a batch brief.
 5. Click a card-level `Pollo` button to copy that source URL and open Pollo.
 6. Generate original variants: UGC, product promo, review, unboxing, explainer, AI creator.
 7. Mention the API only after the manual workflow: scale winners, not random outputs.
 
-During the recording, the prepared examples are inside the app itself. Use the `Demo Picks` chip on the Reels tab instead of hunting for the URLs manually.
+During the recording, the prepared examples are inside the app itself. Use the `Big 10` chip on the Reels tab instead of hunting for the URLs manually.
 
 ## Strong References To Use
 

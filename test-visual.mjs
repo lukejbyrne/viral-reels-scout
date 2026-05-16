@@ -86,11 +86,11 @@ async function run() {
   const defaultReelsChips = await page.locator('.filter-btn').evaluateAll(buttons => buttons.map(button => button.textContent.trim()));
   const hasAiCreatorChip = defaultReelsChips.includes('AI Creator');
   const hasAdsChip = defaultReelsChips.includes('Ads');
-  const hasDemoPicksChip = defaultReelsChips.includes('Demo Picks');
-  const useCaseChips = ['Demo Picks', 'UGC', 'Product Promo', 'Reviews', 'Unboxing', 'Explainers', 'AI Creator'];
+  const hasBig10Chip = defaultReelsChips.includes('Big 10');
+  const useCaseChips = ['Big 10', 'UGC', 'Product Promo', 'Reviews', 'Unboxing', 'Explainers', 'AI Creator'];
   const missingUseCaseChips = useCaseChips.filter(chip => !defaultReelsChips.includes(chip));
   const headerBriefVisible = await page.locator('#brief-btn').isVisible();
-  console.log(`   Reels Demo Picks chip: ${hasDemoPicksChip}`);
+  console.log(`   Reels Big 10 chip: ${hasBig10Chip}`);
   console.log(`   Reels AI Creator chip: ${hasAiCreatorChip}`);
   console.log(`   Reels Ads chip: ${hasAdsChip}`);
   console.log(`   Reels use-case chips: ${missingUseCaseChips.length === 0}`);
@@ -159,13 +159,13 @@ async function run() {
   const reelsSortOptions = await page.locator('#sort-select option').evaluateAll(options => options.map(option => option.value));
   console.log(`   Reels sort options: ${reelsSortOptions.join(', ')}`);
 
-  await page.click('.filter-btn:has-text("Demo Picks")');
+  await page.click('.filter-btn:has-text("Big 10")');
   await page.waitForTimeout(800);
-  const demoPickCards = await page.locator('.card').count();
-  const demoPickLabels = await page.locator('.card-category').evaluateAll(labels => labels.map(label => label.textContent.trim()));
-  const hasDemoPickLabel = demoPickLabels.includes('AI Creator') && demoPickLabels.includes('UGC Hooks');
-  console.log(`   Demo Picks cards: ${demoPickCards}`);
-  console.log(`   Demo Picks labels: ${hasDemoPickLabel}`);
+  const big10Cards = await page.locator('.card').count();
+  const big10Labels = await page.locator('.card-category').evaluateAll(labels => labels.map(label => label.textContent.trim()));
+  const hasBig10Label = big10Labels.includes('AI Creator') && big10Labels.includes('UGC Hooks');
+  console.log(`   Big 10 cards: ${big10Cards}`);
+  console.log(`   Big 10 labels: ${hasBig10Label}`);
 
   // ── SHORTS TAB ──
   console.log('5. Testing Shorts tab...');
@@ -285,12 +285,12 @@ async function run() {
   console.log(`Default Reels active: ${defaultReelsActive ? 'PASS' : 'FAIL'}`);
   console.log(`Default Reels preloaded: ${defaultReelsIframes > 0 ? 'PASS' : 'FAIL'}`);
   console.log(`Old Reels placeholder removed: ${oldReelsPlaceholders === 0 ? 'PASS' : 'FAIL'}`);
-  console.log(`Reels Demo Picks chip: ${hasDemoPicksChip ? 'PASS' : 'FAIL'}`);
+  console.log(`Reels Big 10 chip: ${hasBig10Chip ? 'PASS' : 'FAIL'}`);
   console.log(`Reels AI Creator chip: ${hasAiCreatorChip ? 'PASS' : 'FAIL'}`);
   console.log(`Reels Ads chip: ${hasAdsChip ? 'PASS' : 'FAIL'}`);
   console.log(`Reels use-case chips: ${missingUseCaseChips.length === 0 ? 'PASS' : 'FAIL'}`);
   console.log(`Header video brief action: ${headerBriefVisible ? 'PASS' : 'FAIL'}`);
-  console.log(`Demo Picks view: ${demoPickCards >= 5 && hasDemoPickLabel ? 'PASS' : 'FAIL'}`);
+  console.log(`Big 10 view: ${big10Cards >= 5 && hasBig10Label ? 'PASS' : 'FAIL'}`);
   console.log(`Reels Pollo handoff buttons: ${polloButtons > 0 ? 'PASS' : 'FAIL'}`);
   console.log(`Reels share sort: ${reelsSortOptions.includes('shares') ? 'PASS' : 'FAIL'}`);
   console.log(`Star functionality: ${isStarred ? 'PASS' : 'FAIL'}`);
@@ -300,7 +300,7 @@ async function run() {
   console.log(`Sort options: ${sortOptions > 0 ? 'PASS' : 'FAIL'}`);
   console.log('Screenshots saved to ./screenshots/');
 
-  if (!defaultReelsActive || defaultReelsIframes === 0 || oldReelsPlaceholders !== 0 || !hasDemoPicksChip || !hasAiCreatorChip || !hasAdsChip || missingUseCaseChips.length > 0 || !headerBriefVisible || demoPickCards < 5 || !hasDemoPickLabel || !reelsActive || !shortsActive || !settingsVisible || !isStarred || copyText !== 'Copied!' || !igLinks || !polloButtons || !reelsSortOptions.includes('shares')) {
+  if (!defaultReelsActive || defaultReelsIframes === 0 || oldReelsPlaceholders !== 0 || !hasBig10Chip || !hasAiCreatorChip || !hasAdsChip || missingUseCaseChips.length > 0 || !headerBriefVisible || big10Cards < 5 || !hasBig10Label || !reelsActive || !shortsActive || !settingsVisible || !isStarred || copyText !== 'Copied!' || !igLinks || !polloButtons || !reelsSortOptions.includes('shares')) {
     throw new Error('One or more visual smoke checks failed.');
   }
 
